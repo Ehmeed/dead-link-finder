@@ -38,4 +38,5 @@ kotlin {
 dependencies {
     commonMainImplementation("io.ktor:ktor-client-core:$ktorVersion")
     commonMainImplementation("io.ktor:ktor-client-curl:$ktorVersion")
+    commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
 }
