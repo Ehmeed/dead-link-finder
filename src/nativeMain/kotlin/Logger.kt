@@ -4,7 +4,7 @@ class Logger(private val level: Int) {
         debug { "Initialized logger with level $level" }
     }
 
-    fun error(lazyMessage: () -> String) {
+    fun imporant(lazyMessage: () -> String) {
         if (level >= 1) sout(lazyMessage())
     }
 
