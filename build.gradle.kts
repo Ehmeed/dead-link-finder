@@ -1,3 +1,4 @@
+
 plugins {
     kotlin("multiplatform") version "1.4.20"
 }
@@ -8,11 +9,15 @@ val ktorVersion = "1.4.2"
 
 repositories {
     mavenCentral()
-//    maven { setUrl("https://dl.bintray.com/kotlin/kotlinx") }
-//    maven { setUrl("https://dl.bintray.com/kotlin/ktor") }
 }
 
 kotlin {
+    jvm {
+        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            kotlinOptions { jvmTarget = "1.8" }
+        }
+    }
+
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
@@ -30,13 +35,23 @@ kotlin {
         }
     }
     sourceSets {
-        val nativeMain by getting
+        val nativeMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
+            }
+        }
         val nativeTest by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-apache:$ktorVersion")
+            }
+        }
     }
 }
 
+
+
 dependencies {
     commonMainImplementation("io.ktor:ktor-client-core:$ktorVersion")
-    commonMainImplementation("io.ktor:ktor-client-curl:$ktorVersion")
     commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
 }
