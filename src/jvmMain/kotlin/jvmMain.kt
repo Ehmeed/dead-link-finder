@@ -2,8 +2,11 @@ fun main() {
     val args = arrayOf(
         "--verbose",
         "-d",
-        "1",
-        "http://zahradnictvikarlov.cz",
+        "2",
+        "--cross-domain",
+        "dont-recurse",
+        "-H",
+        "https://zoe.lundegaard.ai/docs/",
     )
     Main.main(args)
 }

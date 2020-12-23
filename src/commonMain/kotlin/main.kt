@@ -25,6 +25,13 @@ class Main : CliktCommand() {
 
     private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
 
+    private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H User-Agent:Mozilla:4.0")
+        .convert {
+            val split = it.split(":", limit = 2)
+            require(split.size == 2) { "Invalid header format" }
+            split[0] to split[1]
+        }.multiple()
+
     enum class CrossDomainBehavior {
         IGNORE, DONT_RECURSE, UNCHANGED
     }
@@ -77,7 +84,7 @@ class Main : CliktCommand() {
                 visited[next] = nextLinks == null
                 val status = if (visited[next] == true) "DEAD" else "OK  "
                 log.info { "$status (depth: $nextDepth): $next" }
-                val newLinks = nextLinks?.filter { it !in toVisit }?.map { it to nextDepth + 1 }?.filter { it.second <= depth }?.toList() ?: emptyList()
+                val newLinks = filterFoundLinks(nextLinks, toVisit.keys, nextDepth)
                 if (newLinks.isNotEmpty()) log.debug { "Adding ${newLinks.size} to pages to visit" }
                 toVisit.putAll(newLinks)
             }
@@ -96,8 +103,28 @@ class Main : CliktCommand() {
         }
     }
 
+    private fun filterFoundLinks(newLinks: Sequence<String>?, toVisit: Set<String>, currentDepth: Int): List<Pair<String, Int>> {
+        if (newLinks == null) return emptyList()
+        val candidateLinks = newLinks.filter { it !in toVisit }
+            .map { it to currentDepth + 1 }
+            .filter { it.second <= depth }
+            .filter { (link, linkDepth) ->
+                when (crossDomain) {
+                    CrossDomainBehavior.IGNORE -> getHost(link) == urlDomain
+                    CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || getHost(link) == urlDomain
+                    CrossDomainBehavior.UNCHANGED -> true
+                }
+            }
+        return candidateLinks.toList()
+    }
+
+    // TODO (MH): 12/23/20 dont parse links when they are not needed (max depth, or cross domain blocks)
+    // TODO (MH): 12/23/20 better link parsing
     private suspend fun HttpClient.getLinks(url: String): Sequence<String>? = runCatching {
-        LINK.findAll(get<String>(url)).map { it.value }
+        val content = get<String>(url) {
+            requestHeaders.forEach { header(it.first, it.second) }
+        }
+        LINK.findAll(content).map { it.value }
     }.onFailure { log.debug { "Failed to get: $url $it" } }
         .getOrNull()
 
@@ -105,6 +132,5 @@ class Main : CliktCommand() {
         fun main(args: Array<String>) = Main().main(args)
     }
 }
-
 
 private fun getHost(url: String): String = URLBuilder(url).build().host
