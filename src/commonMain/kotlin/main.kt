@@ -58,8 +58,6 @@ class Main : CliktCommand() {
         "--debug" to "3",  // print everything
     ).default("1")  // print urls
 
-    private val LINK = Regex("""((?:ht|f)tps?://[-a-zA-Z0-9.]+\.[a-zA-Z]{2,3})(/[^"<]*)?""")
-
     private lateinit var urlDomain: String
 
     private fun validateArguments() {
@@ -103,7 +101,7 @@ class Main : CliktCommand() {
         }
     }
 
-    private fun filterFoundLinks(newLinks: Sequence<String>?, toVisit: Set<String>, currentDepth: Int): List<Pair<String, Int>> {
+    private fun filterFoundLinks(newLinks: List<String>?, toVisit: Set<String>, currentDepth: Int): List<Pair<String, Int>> {
         if (newLinks == null) return emptyList()
         val candidateLinks = newLinks.filter { it !in toVisit }
             .map { it to currentDepth + 1 }
@@ -120,11 +118,11 @@ class Main : CliktCommand() {
 
     // TODO (MH): 12/23/20 dont parse links when they are not needed (max depth, or cross domain blocks)
     // TODO (MH): 12/23/20 better link parsing
-    private suspend fun HttpClient.getLinks(url: String): Sequence<String>? = runCatching {
+    private suspend fun HttpClient.getLinks(url: String): List<String>? = runCatching {
         val content = get<String>(url) {
             requestHeaders.forEach { header(it.first, it.second) }
         }
-        LINK.findAll(content).map { it.value }
+        LinkParser.getLinks(content)
     }.onFailure { log.debug { "Failed to get: $url $it" } }
         .getOrNull()
 

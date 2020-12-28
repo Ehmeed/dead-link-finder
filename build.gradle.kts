@@ -1,10 +1,13 @@
 
+
 plugins {
     kotlin("multiplatform") version "1.4.20"
 }
 
 group = "me.ehmeed"
 version = "1.0-SNAPSHOT"
+
+val kotlinVersion = "1.4.20"
 val ktorVersion = "1.4.2"
 
 repositories {
@@ -35,23 +38,37 @@ kotlin {
         }
     }
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("com.github.ajalt.clikt:clikt:3.0.1")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion")
+            }
+        }
         val nativeMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
-        val nativeTest by getting
         val jvmMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-apache:$ktorVersion")
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+            }
+        }
     }
 }
 
-
-
-dependencies {
-    commonMainImplementation("io.ktor:ktor-client-core:$ktorVersion")
-    commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
-}
+// example how to declare common dependency for all modules
+//dependencies {
+//    commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
+//}
