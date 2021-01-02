@@ -8,7 +8,7 @@ class LinkParserTest {
 
     @Test
     fun emptyPageReturnsNoLinks() {
-        assertEquals(emptyList(), LinkParser.getLinks(""))
+        assertEquals(emptyList(), LinkParser.getLinks("", ""))
     }
 
     @Test
@@ -16,15 +16,25 @@ class LinkParserTest {
         assertTrue { zahradnictviKarlovHtml.isNotBlank() }
         assertEquals(
             listOf(
-            "http://html5shim.googlecode.com/svn/trunk/html5.js",
-            "http://explorercanvas.googlecode.com/svn/trunk/excanvas.js",
-            "https://www.googletagmanager.com/gtag/js?id=UA-162341339-1",
-            "https://cdn.jsdelivr.net/npm/cookie-bar/cookiebar-latest.min.js?forceLang=cs&tracking=1&thirdparty=1&noGeoIp=1&showNoConsent=1",
-            "http://zahradnictvi-karlov.rajce.idnes.cz/",
-            "https://mapy.cz/s/toCP",
-            "http://webThemez.com",
-            "http://zahradnictvikarlov.cz/#work", // TODO (MH): 12/28/20 should contain all "navigation elements" https://stackoverflow.com/questions/20841363/regex-finding-all-href-in-a-tags
-        ).sorted()
-            , LinkParser.getLinks(zahradnictviKarlovHtml).sorted())
+                "http://webThemez.com",
+                "http://zahradnictvi-karlov.rajce.idnes.cz/",
+                "http://zahradnictvikarlov.cz/#",
+                "http://zahradnictvikarlov.cz/#aboutUs",
+                "http://zahradnictvikarlov.cz/#carousel",
+                "http://zahradnictvikarlov.cz/#contactUs",
+                "http://zahradnictvikarlov.cz/#home",
+                "http://zahradnictvikarlov.cz/#top",
+                "http://zahradnictvikarlov.cz/#work",
+                "http://zahradnictvikarlov.cz/images/work/1.jpg",
+                "http://zahradnictvikarlov.cz/images/work/2.jpg",
+                "http://zahradnictvikarlov.cz/images/work/3.jpg",
+                "http://zahradnictvikarlov.cz/images/work/4.jpg",
+                "http://zahradnictvikarlov.cz/images/work/5.jpg",
+                "http://zahradnictvikarlov.cz/images/work/6.jpg",
+                "http://zahradnictvikarlov.cz/images/work/7.jpg",
+                "http://zahradnictvikarlov.cz/images/work/8.jpg",
+                "https://mapy.cz/s/toCP",
+                "mailto:info@zahradnictvikarlov.cz",
+            ).sorted(), LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz").map { it.value }.sorted())
     }
 }

@@ -1,6 +1,7 @@
 fun main() {
     val args = arrayOf(
-        "--verbose",
+        "-v",
+//        "--no-summary",
         "-d",
         "3",
         "--cross-domain",

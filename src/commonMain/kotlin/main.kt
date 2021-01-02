@@ -13,8 +13,9 @@ import kotlinx.coroutines.runBlocking
 private lateinit var log: Logger
 
 class Main : CliktCommand() {
+    // FIXME (MH): 1/2/21 url creating from base url
+
     // TODO (MH): 12/6/20 retry
-    // TODO (MH): 12/6/20 custom headers
     // TODO (MH): 12/6/20 multi threading
     // TODO (MH): 12/6/20 ignore specific domains
     // TODO (MH): 12/12/20 behavior on specific http codes
@@ -63,68 +64,76 @@ class Main : CliktCommand() {
     private fun validateArguments() {
         log = Logger(logLevel.toInt())
         urlDomain = getHost(url)
-        log.debug { "Targeting url: $url host: $urlDomain" }
+        log.important { "Targeting url: $url host: $urlDomain" }
     }
 
     override fun run() = runBlocking<Unit> {
         validateArguments()
 
-        val visited = mutableMapOf<String, Boolean>()
+        val linksStore = LinkStore()
         val httpClient = HttpClient()
         httpClient.use { client ->
-            val toVisit = mutableMapOf<String, Int>()
-            toVisit[url] = 0
-            // TODO (MH): 12/6/20 cross domain
-            while (toVisit.isNotEmpty()) {
-                val next = toVisit.keys.first()
-                val nextDepth = toVisit.remove(toVisit.keys.first()) ?: error("key has to be present")
-                val nextLinks = client.getLinks(next)
-                visited[next] = nextLinks == null
-                val status = if (visited[next] == true) "DEAD" else "OK  "
-                log.info { "$status (depth: $nextDepth): $next" }
-                val newLinks = filterFoundLinks(nextLinks, toVisit.keys, nextDepth)
-                if (newLinks.isNotEmpty()) log.debug { "Adding ${newLinks.size} to pages to visit" }
-                toVisit.putAll(newLinks)
+            linksStore.addToVisit(Link.Absolute(url), 0)
+            while (linksStore.hasNextToVisit()) {
+                val nextToVisit = linksStore.getNextToVisit()
+                val nextLinkContent = client.getContent(nextToVisit.link.value)
+                val isDead = nextLinkContent == null
+                linksStore.addVisited(nextToVisit, isDead)
+                val status = if (isDead) "DEAD" else "OK  "
+                log.info { "$status (depth: ${nextToVisit.depth}): ${nextToVisit.link.value}" }
+                if (!isDead) {
+                    val content = nextLinkContent ?: error("Content of not dead link cannot be null")
+                    val newLinks = getNewLinks(content, nextToVisit, linksStore.getAllToVisitOrVisited())
+                    newLinks.forEach { linksStore.addToVisit(it) }
+                }
             }
         }
 
-        val deadLinks = visited.filterValues { it }
+        val deadLinks = linksStore.getDead()
         if (!noSummary) {
             if (deadLinks.isEmpty()) {
-                log.important { "\nNo dead links found out of ${visited.size} visited urls" }
+                log.important { "\nNo dead links found out of ${linksStore.visitedSize()} visited urls" }
             } else {
-                log.important { "\nFound ${deadLinks.size} dead links out of ${visited.size} visited urls:" }
-                deadLinks.forEach {
-                    log.info { it.key }
-                }
+                log.important { "\nFound ${deadLinks.size} dead links out of ${linksStore.visitedSize()} visited urls:" }
+                deadLinks.forEach { log.important { it } }
             }
         }
     }
 
-    private fun filterFoundLinks(newLinks: List<String>?, toVisit: Set<String>, currentDepth: Int): List<Pair<String, Int>> {
-        if (newLinks == null) return emptyList()
-        val candidateLinks = newLinks.filter { it !in toVisit }
-            .map { it to currentDepth + 1 }
-            .filter { it.second <= depth }
+    private fun getNewLinks(content: String, link: ToVisitLink, toVisitOrVisited: Set<String>): List<ToVisitLink> {
+        val visitedLinkUrl = link.link.value
+        if (link.link is Link.Anchor && link.depth >= 1) {
+            log.debug { "Ignoring nested links in anchor: $visitedLinkUrl" }
+            return emptyList()
+        }
+        if (link.depth == depth) {
+            log.debug { "Reached maximum depth ($depth) for: $visitedLinkUrl" }
+            return emptyList()
+        }
+        val newLinks = LinkParser.getLinks(content, visitedLinkUrl)
+
+        val candidateLinks = newLinks.asSequence()
+            .filter { it !is Link.Mailto }
+            .filter { it.value !in toVisitOrVisited }
+            .map { ToVisitLink(it, link.depth + 1) }
             .filter { (link, linkDepth) ->
                 when (crossDomain) {
-                    CrossDomainBehavior.IGNORE -> getHost(link) == urlDomain
-                    CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || getHost(link) == urlDomain
+                    CrossDomainBehavior.IGNORE -> getHost(link.value) == urlDomain
+                    CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || getHost(link.value) == urlDomain
                     CrossDomainBehavior.UNCHANGED -> true
                 }
-            }
-        return candidateLinks.toList()
+            }.toList()
+        log.debug { "Found ${candidateLinks.size} new links at $visitedLinkUrl" }
+        return candidateLinks
     }
 
-    // TODO (MH): 12/23/20 dont parse links when they are not needed (max depth, or cross domain blocks)
-    // TODO (MH): 12/23/20 better link parsing
-    private suspend fun HttpClient.getLinks(url: String): List<String>? = runCatching {
-        val content = get<String>(url) {
+    private suspend fun HttpClient.getContent(url: String): String? = runCatching {
+        get<String>(url) {
             requestHeaders.forEach { header(it.first, it.second) }
         }
-        LinkParser.getLinks(content)
-    }.onFailure { log.debug { "Failed to get: $url $it" } }
-        .getOrNull()
+    }.onFailure {
+        log.debug { "Failed to get: $url" }
+    }.getOrNull()
 
     companion object {
         fun main(args: Array<String>) = Main().main(args)
