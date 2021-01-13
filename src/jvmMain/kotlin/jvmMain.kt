@@ -3,10 +3,12 @@ fun main() {
         "-v",
 //        "--no-summary",
         "-d",
-        "3",
+        "2",
         "--cross-domain",
         "dont-recurse",
-        "http://zahradnictvikarlov.cz",
+        "-H",
+
+        "https://zoe.lundegaard.ai/docs/",
     )
     Main.main(args)
 }

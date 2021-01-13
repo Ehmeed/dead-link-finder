@@ -1,3 +1,4 @@
+import Ext.getHost
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.*
@@ -5,8 +6,10 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.runBlocking
 
@@ -18,7 +21,11 @@ class Main : CliktCommand() {
     // TODO (MH): 12/6/20 retry
     // TODO (MH): 12/6/20 multi threading
     // TODO (MH): 12/6/20 ignore specific domains
-    // TODO (MH): 12/12/20 behavior on specific http codes
+
+    // TODO (MH): 1/13/21 follow redirects (optionally)
+    // TODO (MH): 1/13/21 allow to customize this
+    private val allowedStatusCodes: List<Int> = (200..300).toList()
+
     private val url: String by argument(help = "Url to target")
     private val depth: Int by option(help = "Max recursion depth", names = arrayOf("-d", "--depth")).int()
         .restrictTo(min = 0)
@@ -71,7 +78,15 @@ class Main : CliktCommand() {
         validateArguments()
 
         val linksStore = LinkStore()
-        val httpClient = HttpClient()
+        val httpClient = HttpClient() {
+            expectSuccess = false
+            HttpResponseValidator {
+                validateResponse { response ->
+                    val statusCode = response.status.value
+                    if (statusCode !in allowedStatusCodes) throw RuntimeException("Disallowed status code: $statusCode")
+                }
+            }
+        }
         httpClient.use { client ->
             linksStore.addToVisit(Link.Absolute(url), 0)
             while (linksStore.hasNextToVisit()) {
@@ -127,17 +142,21 @@ class Main : CliktCommand() {
         return candidateLinks
     }
 
-    private suspend fun HttpClient.getContent(url: String): String? = runCatching {
+    private suspend fun HttpClient.getContent(url: String): String? = try {
         get<String>(url) {
             requestHeaders.forEach { header(it.first, it.second) }
         }
-    }.onFailure {
+    } catch (ex: MalformedInputException) {
+        log.debug { "Cannot read page as string, but status is accepted" }
+        ""
+    } catch (ex: RuntimeException) {
         log.debug { "Failed to get: $url" }
-    }.getOrNull()
+        null
+    }
 
     companion object {
         fun main(args: Array<String>) = Main().main(args)
     }
 }
 
-private fun getHost(url: String): String = URLBuilder(url).build().host
+
