@@ -1,19 +1,33 @@
+import domain.Link
+import domain.LinkContent
+
+data class VisitedLink(
+    val link: Link,
+    val source: Link?,
+    val depth: Int,
+    val content: LinkContent,
+)
+
+data class ToVisitLink(
+    val link: Link,
+    val source: Link?,
+    val depth: Int,
+)
+
 class LinkStore {
 
     private val visitedLinks: MutableMap<String, VisitedLink> = mutableMapOf()
 
     private val toVisitLinks: MutableMap<String, ToVisitLink> = mutableMapOf()
 
-    fun addVisited(link: ToVisitLink, dead: Boolean) {
-        visitedLinks[link.link.value] = VisitedLink(link.link, link.depth, dead)
+    val visited: Map<String, VisitedLink> get() = visitedLinks
+
+    fun addVisited(link: ToVisitLink, content: LinkContent) {
+        visitedLinks[link.link.value] = VisitedLink(link.link, link.source, link.depth, content)
     }
 
-    fun getDead() = visitedLinks.filterValues { it.dead }.map { it.key }
-
-    fun visitedSize() = visitedLinks.size
-
-    fun addToVisit(link: Link, depth: Int) {
-        toVisitLinks[link.value] = ToVisitLink(link, depth)
+    fun addToVisit(link: Link, source: Link?, depth: Int) {
+        toVisitLinks[link.value] = ToVisitLink(link, source, depth)
     }
 
     fun addToVisit(link: ToVisitLink) {
@@ -30,15 +44,3 @@ class LinkStore {
 
     fun getAllToVisitOrVisited() = visitedLinks.keys + toVisitLinks.keys
 }
-
-
-data class VisitedLink(
-    val link: Link,
-    val depth: Int,
-    val dead: Boolean,
-)
-
-data class ToVisitLink(
-    val link: Link,
-    val depth: Int,
-)

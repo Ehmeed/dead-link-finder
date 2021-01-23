@@ -7,7 +7,7 @@ fun main() {
         "--cross-domain",
         "dont-recurse",
         "-H",
-
+        
         "https://zoe.lundegaard.ai/docs/",
     )
     Main.main(args)
