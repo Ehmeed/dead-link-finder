@@ -7,7 +7,7 @@ import com.github.ajalt.clikt.parameters.types.restrictTo
 import domain.Link
 import domain.LinkContent
 import http.Client
-import http.Ext.getHost
+import http.UrlExt.getHost
 import kotlinx.coroutines.runBlocking
 
 lateinit var log: Logger
@@ -19,21 +19,22 @@ class Main : CliktCommand() {
 
     // TODO (MH): 12/6/20 retry
     // TODO (MH): 12/6/20 multi threading
-    // TODO (MH): 12/6/20 ignore specific domains
+
     // TODO (MH): 1/23/21 timeout per request
 
-    // TODO (MH): 1/13/21 follow redirects (optionally)
+    // TODO (MH): 1/13/21 follow redirects
     // TODO rate limiting
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
+    // TODO (MH): 2/11/21 skip fragments(anchors)
 
-
+    // TODO (MH): 12/6/20 ignore specific domains, allow custom response codes per domain
     // TODO (MH): 1/13/21 allow to customize this
     private val allowedStatusCodes: List<Int> = (200..300).toList()
 
     private val url: String by argument(help = "Url to target")
     private val depth: Int by option(help = "Max recursion depth", names = arrayOf("-d", "--depth")).int()
         .restrictTo(min = 0)
-        .default(3)
+        .default(99)
 
     private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
 
@@ -68,14 +69,14 @@ class Main : CliktCommand() {
         "-v" to "2",       // verbose info
         "--verbose" to "2",// verbose info
         "--debug" to "3",  // print everything
-    ).default("1")  // print urls
+    ).default("1")  // print only summary
 
     private lateinit var urlDomain: String
 
     private fun validateArguments() {
         log = Logger(logLevel.toInt())
         urlDomain = getHost(url)
-        log.default { "Targeting url: $url host: $urlDomain" }
+        log.debug { "Targeting url: $url host: $urlDomain" }
     }
 
     override fun run() = runBlocking<Unit> {
@@ -118,7 +119,7 @@ class Main : CliktCommand() {
 
     private fun getNewLinks(content: String, link: ToVisitLink, toVisitOrVisited: Set<String>): List<ToVisitLink> {
         val visitedLinkUrl = link.link.value
-        if (link.link is Link.Anchor && link.depth >= 1) {
+        if (link.link is Link.Anchor) {
             log.debug { "Ignoring nested links in anchor: $visitedLinkUrl" }
             return emptyList()
         }

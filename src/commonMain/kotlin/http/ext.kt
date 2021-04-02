@@ -1,8 +1,9 @@
 package http
 
 import io.ktor.http.*
+import log
 
-object Ext {
+object UrlExt {
     fun getHost(url: String): String {
         val parsedUrl = URLBuilder(url).build()
         return if (parsedUrl.port == parsedUrl.protocol.defaultPort) parsedUrl.host
@@ -11,6 +12,16 @@ object Ext {
 
     fun removeUrlPath(url: String): String {
         val parsedUrl = URLBuilder(url).build()
-        return url.removeSuffix(parsedUrl.fullPath)
+        val fragment = "#${parsedUrl.fragment}"
+        val path = parsedUrl.fullPath
+        return url.removeSuffix(fragment).removeSuffix(path)
+    }
+
+    fun isUrl(url: String): Boolean = try {
+        URLBuilder(url)
+        true
+    } catch (e: URLParserException) {
+        log.debug { "Not a valid URL: $url" }
+        false
     }
 }
