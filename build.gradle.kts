@@ -1,14 +1,14 @@
 
 
 plugins {
-    kotlin("multiplatform") version "1.4.20"
+    kotlin("multiplatform") version "1.4.31"
 }
 
 group = "me.ehmeed"
-version = "1.0-SNAPSHOT"
+version = "0.1"
 
-val kotlinVersion = "1.4.20"
-val ktorVersion = "1.4.2"
+val kotlinVersion = "1.4.31"
+val ktorVersion = "1.5.2"
 
 repositories {
     mavenCentral()
@@ -27,7 +27,7 @@ kotlin {
         hostOs == "Mac OS X" -> macosX64("native")
         hostOs == "Linux" -> linuxX64("native")
         isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+        else -> throw GradleException("Host OS $hostOs is not supported in Kotlin/Native.")
     }
 
     nativeTarget.apply {

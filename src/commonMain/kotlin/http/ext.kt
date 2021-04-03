@@ -1,7 +1,6 @@
 package http
 
 import io.ktor.http.*
-import log
 
 object UrlExt {
     fun getHost(url: String): String {
@@ -21,7 +20,7 @@ object UrlExt {
         URLBuilder(url)
         true
     } catch (e: URLParserException) {
-        log.debug { "Not a valid URL: $url" }
+        Logger.log.debug { "Not a valid URL: $url" }
         false
     }
 }

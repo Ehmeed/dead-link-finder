@@ -4,15 +4,9 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
-import domain.Link
-import domain.LinkContent
-import http.Client
 import http.UrlExt.getHost
-import kotlinx.coroutines.runBlocking
 
-lateinit var log: Logger
-
-private const val USER_INPUT_LINK = "<given by user input>"
+private lateinit var config: Config
 
 class Main : CliktCommand() {
     // FIXME (MH): 1/2/21 url creating from base url
@@ -22,11 +16,12 @@ class Main : CliktCommand() {
 
     // TODO (MH): 1/23/21 timeout per request
 
-    // TODO (MH): 1/13/21 follow redirects
     // TODO rate limiting
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
-    // TODO (MH): 2/11/21 skip fragments(anchors)
+    // TODO (MH): 4/3/21 exit code
 
+    // TODO config object
+    // TODO (MH): 2/11/21 skip fragments(anchors)
     // TODO (MH): 12/6/20 ignore specific domains, allow custom response codes per domain
     // TODO (MH): 1/13/21 allow to customize this
     private val allowedStatusCodes: List<Int> = (200..300).toList()
@@ -71,82 +66,28 @@ class Main : CliktCommand() {
         "--debug" to "3",  // print everything
     ).default("1")  // print only summary
 
-    private lateinit var urlDomain: String
 
-    private fun validateArguments() {
-        log = Logger(logLevel.toInt())
-        urlDomain = getHost(url)
-        log.debug { "Targeting url: $url host: $urlDomain" }
-    }
+    override fun run()  {
+        Logger.log = Logger(logLevel.toInt())
+        val urlDomain = getHost(url)
+        Logger.log.debug { "Targeting url: $url host: $urlDomain" }
 
-    override fun run() = runBlocking<Unit> {
-        validateArguments()
-
-        val linksStore = LinkStore()
-        val httpClient = Client(allowedStatusCodes, requestHeaders)
-
-        httpClient.use { client ->
-            linksStore.addToVisit(Link.Absolute(url), null, 0)
-            while (linksStore.hasNextToVisit()) {
-                val nextToVisit = linksStore.getNextToVisit()
-                val nextLinkContent = client.getContent(nextToVisit.link.value)
-                if (nextLinkContent is LinkContent.Success) {
-                    val newLinks = getNewLinks(nextLinkContent.content, nextToVisit, linksStore.getAllToVisitOrVisited())
-                    newLinks.forEach { linksStore.addToVisit(it) }
-                }
-                linksStore.addVisited(nextToVisit, nextLinkContent)
-                log.verbose { "${nextLinkContent.statusString} (depth: ${nextToVisit.depth}): ${nextToVisit.link.value} <- ${nextToVisit.source?.value ?: USER_INPUT_LINK}" }
-            }
-        }
-
-        val visitedLinks = linksStore.visited.values
-        val visitedCount = visitedLinks.size
-        val deadLinks = visitedLinks.filter {
-            when (it.content) {
-                is LinkContent.Success, LinkContent.UnreadableSuccess -> false
-                is LinkContent.InvalidStatusCode, is LinkContent.Unreachable -> true
-            }
-        }
-        if (!noSummary) {
-            if (deadLinks.isEmpty()) {
-                log.default { "\nNo dead links found out of $visitedCount visited urls" }
-            } else {
-                log.default { "\nFound ${deadLinks.size} dead links out of $visitedCount visited urls:" }
-                deadLinks.forEach { log.default { "${it.link.value}  <- ${it.source?.value ?: USER_INPUT_LINK} :: ${it.content.statusString}" } }
-            }
-        }
-    }
-
-    private fun getNewLinks(content: String, link: ToVisitLink, toVisitOrVisited: Set<String>): List<ToVisitLink> {
-        val visitedLinkUrl = link.link.value
-        if (link.link is Link.Anchor) {
-            log.debug { "Ignoring nested links in anchor: $visitedLinkUrl" }
-            return emptyList()
-        }
-        if (link.depth == depth) {
-            log.debug { "Reached maximum depth ($depth) for: $visitedLinkUrl" }
-            return emptyList()
-        }
-        val newLinks = LinkParser.getLinks(content, visitedLinkUrl)
-
-        val candidateLinks = newLinks.asSequence()
-            .filter { it !is Link.Mailto }
-            .filter { it.value !in toVisitOrVisited }
-            .map { ToVisitLink(it, link.link, link.depth + 1) }
-            .filter { (link, _, linkDepth) ->
-                when (crossDomain) {
-                    CrossDomainBehavior.IGNORE -> getHost(link.value) == urlDomain
-                    CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || getHost(link.value) == urlDomain
-                    CrossDomainBehavior.UNCHANGED -> true
-                }
-            }.toList()
-        log.debug { "Found ${candidateLinks.size} new links at $visitedLinkUrl" }
-        return candidateLinks
+        config = Config(
+            allowedStatusCodes = allowedStatusCodes,
+            url = url,
+            depth = depth,
+            noSummary = noSummary,
+            requestHeaders = requestHeaders,
+            crossDomainBehavior = crossDomain,
+            logLevel = logLevel,
+            urlDomain = urlDomain
+        )
     }
 
     companion object {
-        fun main(args: Array<String>) = Main().main(args)
+        suspend fun main(args: Array<String>) {
+            Main().main(args)
+            run(config)
+        }
     }
 }
-
-

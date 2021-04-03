@@ -8,12 +8,12 @@ import io.ktor.client.request.*
 import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
 import io.ktor.utils.io.errors.*
-import log
 
 class Client(private val allowedStatusCodes: List<Int>, private val requestHeaders: List<Pair<String, String>>) {
 
     private val httpClient = HttpClient() {
         expectSuccess = false
+        followRedirects = true
         HttpResponseValidator {
             validateResponse { response ->
                 val statusCode = response.status.value
@@ -33,13 +33,13 @@ class Client(private val allowedStatusCodes: List<Int>, private val requestHeade
             requestHeaders.forEach { header(it.first, it.second) }
         }.let { LinkContent.Success(it) }
     } catch (ex: MalformedInputException) {
-        log.debug { "Cannot read page as string, but status is accepted" }
+        Logger.log.debug { "Cannot read page as string, but status is accepted" }
         LinkContent.UnreadableSuccess
     } catch (ex: HttpCallException) {
-        log.debug { "Invalid status code ${ex.status} for: $url" }
+        Logger.log.debug { "Invalid status code ${ex.status} for: $url" }
         LinkContent.InvalidStatusCode(ex.status)
     } catch (ex: IOException) {
-        log.debug { "Failed to get: $url $ex" }
+        Logger.log.debug { "Failed to get: $url $ex" }
         LinkContent.Unreachable(ex.message ?: "unknown reason")
     }
 }

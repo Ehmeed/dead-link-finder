@@ -1,5 +1,10 @@
 class Logger(private val level: Int) {
 
+    companion object {
+        // FIXME (MH): 4/3/21 this is shit
+        lateinit var log: Logger
+    }
+
     init {
         debug { "Initialized logger with level $level" }
     }
