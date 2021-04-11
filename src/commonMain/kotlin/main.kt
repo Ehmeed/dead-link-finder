@@ -67,10 +67,12 @@ class Main : CliktCommand() {
     ).default("1")  // print only summary
 
 
-    override fun run()  {
-        Logger.log = Logger(logLevel.toInt())
+    override fun run() {
+        log = Logger(logLevel.toInt())
         val urlDomain = getHost(url)
-        Logger.log.debug { "Targeting url: $url host: $urlDomain" }
+        // FIXME (MH): 4/3/21 this is shit
+//        @ThreadLocal
+        log.debug { "Targeting url: $url host: $urlDomain" }
 
         config = Config(
             allowedStatusCodes = allowedStatusCodes,

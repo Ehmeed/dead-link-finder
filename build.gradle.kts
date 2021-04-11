@@ -8,7 +8,8 @@ group = "me.ehmeed"
 version = "0.1"
 
 val kotlinVersion = "1.4.31"
-val ktorVersion = "1.5.2"
+// ktor 1.5 fails on mutability of frozen client
+val ktorVersion = "1.4.0"
 
 repositories {
     mavenCentral()
@@ -18,6 +19,14 @@ kotlin {
     jvm {
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
             kotlinOptions { jvmTarget = "1.8" }
+        }
+        tasks.withType<Jar> {
+            manifest {
+                attributes["Main-Class"] = "JvmMainKt"
+            }
+            from({
+                configurations["jvmRuntimeClasspath"].filter { it.name.endsWith("jar") }.map { zipTree(it) }
+            })
         }
     }
 
@@ -66,9 +75,13 @@ kotlin {
             }
         }
     }
+
 }
+
+
 
 // example how to declare common dependency for all modules
 //dependencies {
 //    commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
 //}
+

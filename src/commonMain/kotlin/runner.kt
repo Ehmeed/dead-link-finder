@@ -4,11 +4,9 @@ import http.Client
 import http.UrlExt
 
 private const val USER_INPUT_LINK = "<given by user input>"
-private lateinit var log: Logger
 
 
 suspend fun run(config: Config) {
-    log = Logger.log
     val linksStore = LinkStore()
     val httpClient = Client(config.allowedStatusCodes, config.requestHeaders)
 
@@ -36,10 +34,10 @@ suspend fun run(config: Config) {
     }
     if (!config.noSummary) {
         if (deadLinks.isEmpty()) {
-            log.default { "\nNo dead links found out of $visitedCount visited urls" }
+            log.default { "No dead links found out of $visitedCount visited urls" }
         } else {
-            log.default { "\nFound ${deadLinks.size} dead links out of $visitedCount visited urls:" }
-            deadLinks.forEach { log.default { "${it.link.value}  <- ${it.source?.value ?: USER_INPUT_LINK} :: ${it.content.statusString}" } }
+            log.default { "Found ${deadLinks.size} dead links out of $visitedCount visited urls:" }
+            deadLinks.forEach { log.default { "${it.link.value} <- ${it.source?.value ?: USER_INPUT_LINK} :: ${it.content.statusString}" } }
         }
     }
 

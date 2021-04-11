@@ -1,5 +1,10 @@
+#!/usr/bin/env python3
+
 from flask import abort, redirect, url_for
 from flask import Flask
+
+HOST = "localhost"
+PORT = 5000
 
 app = Flask(__name__)
 
@@ -19,8 +24,14 @@ def redirect_example():
 
 @app.route('/same-domain')
 def same_domain():
+    return f"""
+         <a href="http://www.{HOST}:{PORT}">LINK</a>
+    """
+
+@app.route('/cross-domain')
+def cross_domain():
     return """
-         <a href="http://www.localhost:5000">LINK</a>
+         <a href="https://www.example.com">LINK</a>
     """
 
 

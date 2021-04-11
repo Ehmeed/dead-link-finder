@@ -1,0 +1,52 @@
+[
+  {
+    "target": "/",
+    "args": "",
+    "expected": "No dead links found out of 1 visited urls"
+  },
+  {
+    "target": "/",
+    "args": "--no-summary",
+    "expected": ""
+  },
+  {
+    "target": "/redirect",
+    "args": "",
+    "expected": "No dead links found out of 1 visited urls"
+  },
+  {
+    "target": "/same-domain",
+    "args": "",
+    "expected": "No dead links found out of 2 visited urls"
+  },
+  {
+    "target": "/same-domain",
+    "args": "--depth 0",
+    "expected": "No dead links found out of 1 visited urls"
+  },
+  {
+    "target": "/empty",
+    "args": "",
+    "expected": "No dead links found out of 1 visited urls"
+  },
+  {
+    "target": "/forbidden",
+    "args": "",
+    "expected": "Found 1 dead links out of 1 visited urls:\\nhttp://www.localhost:5000/forbidden  <- <given by user input> :: FAIL (status: 403)"
+  },
+  {
+    "target": "/cross-domain",
+    "args": "",
+    "expected": "No dead links found out of 2 visited urls"
+  },
+  {
+    "target": "/cross-domain",
+    "args": "--cross-domain dont-recurse",
+    "expected": "No dead links found out of 2 visited urls"
+  },
+  {
+    "target": "/cross-domain",
+    "args": "--cross-domain ignore",
+    "expected": "No dead links found out of 1 visited urls"
+  }
+]
