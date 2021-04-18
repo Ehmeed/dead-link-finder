@@ -48,5 +48,41 @@
     "target": "/cross-domain",
     "args": "--cross-domain ignore",
     "expected": "No dead links found out of 1 visited urls"
+  },
+  {
+    "target": "/depth",
+    "args": "",
+    "expected": "No dead links found out of 3 visited urls"
+  },
+  {
+    "target": "/depth",
+    "args": "--depth 1",
+    "expected": "No dead links found out of 2 visited urls"
+  }
+,
+  {
+    "target": "/multiple",
+    "args": "",
+    "expected": "No dead links found out of 3 visited urls"
+  },
+  {
+    "target": "/multiple-same",
+    "args": "",
+    "expected": "No dead links found out of 2 visited urls"
+  },
+  {
+    "target": "/root-relative",
+    "args": "",
+    "expected": "No dead links found out of 2 visited urls"
+  },
+  {
+    "target": "/relative-dead",
+    "args": "",
+    "expected": "Found 1 dead links out of 2 visited urls:\\nhttp://www.localhost:5000/relative-dead/dead <- http://www.localhost:5000/relative-dead :: FAIL (status: 404)"
+  },
+  {
+    "target": "/anchor",
+    "args": "",
+    "expected": "No dead links found out of 2 visited urls"
   }
 ]

@@ -6,7 +6,7 @@ import http.UrlExt
 private const val USER_INPUT_LINK = "<given by user input>"
 
 
-suspend fun run(config: Config) {
+suspend fun runner(config: Config) {
     val linksStore = LinkStore()
     val httpClient = Client(config.allowedStatusCodes, config.requestHeaders)
 
@@ -20,18 +20,14 @@ suspend fun run(config: Config) {
                 newLinks.forEach { linksStore.addToVisit(it) }
             }
             linksStore.addVisited(nextToVisit, nextLinkContent)
-            log.verbose { "${nextLinkContent.statusString} (depth: ${nextToVisit.depth}): ${nextToVisit.link.value} <- ${nextToVisit.source?.value ?: USER_INPUT_LINK}" }
+            val linkLogger = if (nextLinkContent.isSuccess) { it: () -> String -> log.verbose(it) } else { it: () -> String -> log.default(it) }
+            linkLogger { "${nextLinkContent.statusString} (depth: ${nextToVisit.depth}): ${nextToVisit.link.value} <- ${nextToVisit.source?.value ?: USER_INPUT_LINK}" }
         }
     }
 
     val visitedLinks = linksStore.visited.values
     val visitedCount = visitedLinks.size
-    val deadLinks = visitedLinks.filter {
-        when (it.content) {
-            is LinkContent.Success, LinkContent.UnreadableSuccess -> false
-            is LinkContent.InvalidStatusCode, is LinkContent.Unreachable -> true
-        }
-    }
+    val deadLinks = visitedLinks.filter { !it.content.isSuccess }
     if (!config.noSummary) {
         if (deadLinks.isEmpty()) {
             log.default { "No dead links found out of $visitedCount visited urls" }

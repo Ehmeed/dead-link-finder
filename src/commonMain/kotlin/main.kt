@@ -5,23 +5,26 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
 import http.UrlExt.getHost
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // FIXME (MH): 1/2/21 url creating from base url
-
-    // TODO (MH): 12/6/20 retry
-    // TODO (MH): 12/6/20 multi threading
-
-    // TODO (MH): 1/23/21 timeout per request
-
-    // TODO rate limiting
-    // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
+    // fix tests
+    // shutdown hook
+    // TODO (MH): 2/11/21 skip fragments(anchors)
     // TODO (MH): 4/3/21 exit code
 
+    // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
+    // TODO (MH): 12/6/20 retry
+    // TODO (MH): 12/6/20 multi threading
+    // TODO (MH): 1/23/21 timeout per request
+    // TODO rate limiting
+    // TODO (MH): 4/18/21 print version and exit (hard to do)
+
+
     // TODO config object
-    // TODO (MH): 2/11/21 skip fragments(anchors)
     // TODO (MH): 12/6/20 ignore specific domains, allow custom response codes per domain
     // TODO (MH): 1/13/21 allow to customize this
     private val allowedStatusCodes: List<Int> = (200..300).toList()
@@ -54,8 +57,8 @@ class Main : CliktCommand() {
     private val logLevel by option(help = """Verbosity level:
         ```
             -q, --quiet:    no output
-            default:        warnings and errors
-            -v, --verbose:  verbose output
+            default:        prints only dead links
+            -v, --verbose:  prints all targeted links
             --debug:        debug output
         ```
     """.trimIndent()).switch(
@@ -68,11 +71,10 @@ class Main : CliktCommand() {
 
 
     override fun run() {
+        // FIXME (MH): 4/3/21 this is shit
         log = Logger(logLevel.toInt())
         val urlDomain = getHost(url)
-        // FIXME (MH): 4/3/21 this is shit
-//        @ThreadLocal
-        log.debug { "Targeting url: $url host: $urlDomain" }
+        log.default { "Targeting url: $url host: $urlDomain" }
 
         config = Config(
             allowedStatusCodes = allowedStatusCodes,
@@ -87,9 +89,15 @@ class Main : CliktCommand() {
     }
 
     companion object {
+        @OptIn(ExperimentalTime::class)
         suspend fun main(args: Array<String>) {
-            Main().main(args)
-            run(config)
+            val executionTime = measureTime {
+                Main().main(args)
+                runner(config)
+            }
+            if (!config.noSummary) {
+                log.verbose { "Execution finished in ${executionTime.toIsoString()}" }
+            }
         }
     }
 }

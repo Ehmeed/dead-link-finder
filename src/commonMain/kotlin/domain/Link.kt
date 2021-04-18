@@ -5,7 +5,7 @@ sealed class Link {
     abstract val rawValue: String
 
     class Anchor(override val rawValue: String, baseUrl: String) : Link() {
-        override val value: String = baseUrl + rawValue
+        override val value: String = baseUrl.dropLast(1) + rawValue
     }
 
     data class Absolute(override val rawValue: String) : Link() {
