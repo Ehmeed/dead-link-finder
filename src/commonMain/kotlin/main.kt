@@ -11,10 +11,19 @@ import kotlin.time.measureTime
 private lateinit var config: Config
 
 class Main : CliktCommand() {
+    // TODO (MH): (maybe could be enabled by flag ?) 4/18/21 parse out text from link properly  - also try perf when removed parsing of text - seems to slow down a LOT - DO THIS FIRST -
+    // TODO (MH): 4/18/21 nice output formatting with tabs maybe
     // fix tests
+    // examples in readme
     // shutdown hook
-    // TODO (MH): 2/11/21 skip fragments(anchors)
-    // TODO (MH): 4/3/21 exit code
+    /** in java runTime.getRuntime - but it executes also on succcess - somehow unit to be both same
+     *  signal(SIGINT, staticCFunction<Int, Unit> {
+            println("Exit!")
+        })
+     */
+    // TODO (MH): 4/3/21 exit code - use expect actual - easy
+    // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
+    // TODO (MH): 4/18/21 allow multiple input urls? maybe hard because main domain etc
 
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
     // TODO (MH): 12/6/20 retry

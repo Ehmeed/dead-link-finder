@@ -22,16 +22,14 @@ class LinkStore {
 
     val visited: Map<String, VisitedLink> get() = visitedLinks
 
-    fun addVisited(link: ToVisitLink, content: LinkContent) {
-        visitedLinks[link.link.value] = VisitedLink(link.link, link.source, link.depth, content)
+    fun addVisited(link: VisitedLink) {
+        visitedLinks[link.link.value] = link
     }
 
-    fun addToVisit(link: Link, source: Link?, depth: Int) {
-        toVisitLinks[link.value] = ToVisitLink(link, source, depth)
-    }
-
-    fun addToVisit(link: ToVisitLink) {
-        toVisitLinks[link.link.value] = link
+    fun addToVisit(links: List<ToVisitLink>) {
+        links.associateBy { it.link.value }
+            .filterKeys { it !in (visitedLinks.keys + toVisitLinks.keys) }
+            .let(toVisitLinks::putAll)
     }
 
     fun hasNextToVisit() = toVisitLinks.isNotEmpty()
@@ -41,6 +39,4 @@ class LinkStore {
         val first = toVisitLinks.keys.first()
         return toVisitLinks.remove(first) ?: error("key has to be present")
     }
-
-    fun getAllToVisitOrVisited() = visitedLinks.keys + toVisitLinks.keys
 }

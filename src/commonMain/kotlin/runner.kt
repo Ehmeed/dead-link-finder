@@ -5,23 +5,23 @@ import http.UrlExt
 
 private const val USER_INPUT_LINK = "<given by user input>"
 
-
 suspend fun runner(config: Config) {
     val linksStore = LinkStore()
     val httpClient = Client(config.allowedStatusCodes, config.requestHeaders)
 
     httpClient.use { client ->
-        linksStore.addToVisit(Link.Absolute(config.url), source = null, depth = 0)
+        linksStore.addToVisit(listOf(ToVisitLink(Link.Absolute(USER_INPUT_LINK, config.url), source = null, depth = 0)))
         while (linksStore.hasNextToVisit()) {
             val nextToVisit = linksStore.getNextToVisit()
-            val nextLinkContent = client.getContent(nextToVisit.link.value)
-            if (nextLinkContent is LinkContent.Success) {
-                val newLinks = getNewLinks(nextLinkContent.content, nextToVisit, linksStore.getAllToVisitOrVisited(), config)
-                newLinks.forEach { linksStore.addToVisit(it) }
+            val nextToVisitContent = client.getContent(nextToVisit.link.value)
+            val visitedLink = VisitedLink(nextToVisit.link, nextToVisit.source, nextToVisit.depth, nextToVisitContent)
+            linksStore.addVisited(visitedLink)
+            if (visitedLink.content is LinkContent.Success) {
+                getNewLinks(visitedLink.content.content, nextToVisit, config)
+                    .let(linksStore::addToVisit)
             }
-            linksStore.addVisited(nextToVisit, nextLinkContent)
-            val linkLogger = if (nextLinkContent.isSuccess) { it: () -> String -> log.verbose(it) } else { it: () -> String -> log.default(it) }
-            linkLogger { "${nextLinkContent.statusString} (depth: ${nextToVisit.depth}): ${nextToVisit.link.value} <- ${nextToVisit.source?.value ?: USER_INPUT_LINK}" }
+            val linkLogger = if (visitedLink.content.isSuccess) { it: () -> String -> log.verbose(it) } else { it: () -> String -> log.default(it) }
+            linkLogger { formatLink(visitedLink) }
         }
     }
 
@@ -33,27 +33,22 @@ suspend fun runner(config: Config) {
             log.default { "No dead links found out of $visitedCount visited urls" }
         } else {
             log.default { "Found ${deadLinks.size} dead links out of $visitedCount visited urls:" }
-            deadLinks.forEach { log.default { "${it.link.value} <- ${it.source?.value ?: USER_INPUT_LINK} :: ${it.content.statusString}" } }
+            deadLinks.forEach { log.default { formatLink(it) } }
         }
     }
 
 }
 
-private fun getNewLinks(content: String, link: ToVisitLink, toVisitOrVisited: Set<String>, config: Config): List<ToVisitLink> {
+private fun getNewLinks(content: String, link: ToVisitLink, config: Config): List<ToVisitLink> {
     val visitedLinkUrl = link.link.value
-    if (link.link is Link.Anchor) {
-        log.debug { "Ignoring nested links in anchor: $visitedLinkUrl" }
-        return emptyList()
-    }
     if (link.depth == config.depth) {
-        log.debug { "Reached maximum depth ($config.depth) for: $visitedLinkUrl" }
+        log.debug { "Reached maximum depth (${config.depth}) for: $visitedLinkUrl" }
         return emptyList()
     }
     val newLinks = LinkParser.getLinks(content, visitedLinkUrl)
 
     val candidateLinks = newLinks.asSequence()
-        .filter { it !is Link.Mailto }
-        .filter { it.value !in toVisitOrVisited }
+        .filterNot { it is Link.Mailto }
         .map { ToVisitLink(it, link.link, link.depth + 1) }
         .filter { (link, _, linkDepth) ->
             when (config.crossDomainBehavior) {
@@ -62,6 +57,9 @@ private fun getNewLinks(content: String, link: ToVisitLink, toVisitOrVisited: Se
                 Main.CrossDomainBehavior.UNCHANGED -> true
             }
         }.toList()
-    log.debug { "Found ${candidateLinks.size} new links at $visitedLinkUrl" }
+    log.debug { "Found ${candidateLinks.size} links at $visitedLinkUrl" }
     return candidateLinks
 }
+
+private fun formatLink(visited: VisitedLink) =
+    "${visited.content.statusString} (depth: ${visited.depth}) :: ${visited.link.value} found at ${visited.source?.value ?: USER_INPUT_LINK} with text: ${visited.link.text.replace('\n', ' ')}"

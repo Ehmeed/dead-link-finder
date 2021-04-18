@@ -1,3 +1,4 @@
+import domain.Link
 import io.ktor.http.*
 import kotlin.test.*
 
@@ -45,4 +46,43 @@ class LinkParserTest {
             .map { it.value }.sorted()
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun validateLinkWithTagsInside() {
+        val links = LinkParser.getLinks(
+            """to <a href="/docs/s-analytics/form-model-analysis"><strong>analyse a form model</strong></a>""",
+            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/"
+        ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
+
+        assertEquals(links.size, 1)
+        val actual = links.single()
+
+        val expected = Link.RootRelative("<strong>analyse a form model</strong>",
+            "/docs/s-analytics/form-model-analysis",
+            "https://zoe.lundegaard.ai/")
+
+        assertEquals(expected.rawValue, actual.rawValue)
+        assertEquals(expected.text, actual.text)
+        assertEquals(expected.value, actual.value)
+    }
+    @Test
+    fun validateLinkWithoutTagsInsideWithNewline() {
+        val links = LinkParser.getLinks(
+            """<a href="/docs/s-analytics/form-model-analysis">analyse a form
+model</a>""",
+            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/"
+        ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
+
+        assertEquals(links.size, 1)
+        val actual = links.single()
+
+        val expected = Link.RootRelative("analyse a form\nmodel",
+            "/docs/s-analytics/form-model-analysis",
+            "https://zoe.lundegaard.ai/")
+
+        assertEquals(expected.rawValue, actual.rawValue)
+        assertEquals(expected.text, actual.text)
+        assertEquals(expected.value, actual.value)
+    }
+
 }
