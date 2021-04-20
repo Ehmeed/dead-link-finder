@@ -1,11 +1,13 @@
-import kotlin.native.concurrent.ThreadLocal
-
 lateinit var log: Logger
 
 class Logger(private val level: Int) {
 
     init {
         debug { "Initialized logger with level $level" }
+    }
+
+    fun force(lazyMessage: () -> String) {
+        sout(lazyMessage)
     }
 
     fun default(lazyMessage: () -> String) {

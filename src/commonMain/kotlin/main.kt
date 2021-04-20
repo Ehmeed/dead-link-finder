@@ -11,7 +11,8 @@ import kotlin.time.measureTime
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // TODO (MH): (maybe could be enabled by flag ?) 4/18/21 parse out text from link properly  - also try perf when removed parsing of text - seems to slow down a LOT - DO THIS FIRST -
+    // TODO (MH): (maybe could be enabled by flag ?) 4/18/21 parse out text from link properly  - also try perf when removed parsing of text - seems to slow down a LOT - DO THIS FIRST - seems to be only native issue
+    // try to parse text by some simple algorithm from names.txt
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe
     // fix tests
     // examples in readme
@@ -24,6 +25,8 @@ class Main : CliktCommand() {
     // TODO (MH): 4/3/21 exit code - use expect actual - easy
     // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
     // TODO (MH): 4/18/21 allow multiple input urls? maybe hard because main domain etc
+    // TODO (MH): 4/20/21 putting unreachable URL as argument crashes with exception
+
 
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
     // TODO (MH): 12/6/20 retry
@@ -95,6 +98,7 @@ class Main : CliktCommand() {
             logLevel = logLevel,
             urlDomain = urlDomain
         )
+
     }
 
     companion object {

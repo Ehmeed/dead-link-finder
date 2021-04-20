@@ -29,6 +29,9 @@ class LinkStore {
     fun addToVisit(links: List<ToVisitLink>) {
         links.associateBy { it.link.value }
             .filterKeys { it !in (visitedLinks.keys + toVisitLinks.keys) }
+            .also {
+                log.debug { "Adding ${it.size} new list of out ${links.size} candidates" }
+            }
             .let(toVisitLinks::putAll)
     }
 

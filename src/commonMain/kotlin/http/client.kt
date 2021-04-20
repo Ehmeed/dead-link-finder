@@ -33,18 +33,12 @@ class Client(private val allowedStatusCodes: List<Int>, private val requestHeade
             requestHeaders.forEach { header(it.first, it.second) }
         }.let { LinkContent.Success(it) }
     } catch (ex: MalformedInputException) {
-        // FIXME (MH): 4/3/21 this is shit
-//        @ThreadLocal
         log.debug { "Cannot read page as string, but status is accepted" }
         LinkContent.UnreadableSuccess
     } catch (ex: HttpCallException) {
-        // FIXME (MH): 4/3/21 this is shit
-//        @ThreadLocal
         log.debug { "Invalid status code ${ex.status} for: $url" }
         LinkContent.InvalidStatusCode(ex.status)
     } catch (ex: IOException) {
-        // FIXME (MH): 4/3/21 this is shit
-//        @ThreadLocal
         log.debug { "Failed to get: $url $ex" }
         LinkContent.Unreachable(ex.message ?: "unknown reason")
     }
