@@ -11,8 +11,8 @@ import kotlin.time.measureTime
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // TODO (MH): (maybe could be enabled by flag ?) 4/18/21 parse out text from link properly  - also try perf when removed parsing of text - seems to slow down a LOT - DO THIS FIRST - seems to be only native issue
-    // try to parse text by some simple algorithm from names.txt
+    // TODO try to parse text by some simple algorithm from names.txt
+    // TODO (MH): 4/18/21 print version and exit
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe
     // fix tests
     // examples in readme
@@ -33,7 +33,7 @@ class Main : CliktCommand() {
     // TODO (MH): 12/6/20 multi threading
     // TODO (MH): 1/23/21 timeout per request
     // TODO rate limiting
-    // TODO (MH): 4/18/21 print version and exit (hard to do)
+
 
 
     // TODO config object
@@ -46,7 +46,7 @@ class Main : CliktCommand() {
         .restrictTo(min = 0)
         .default(99)
 
-    private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
+    private val parseText: Boolean by option("--show-link-text", help = "Shows text displayed on the element with each link. This will highly slow down execution.").flag(default = false)
 
     private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H User-Agent:Mozilla:4.0")
         .convert {
@@ -66,6 +66,8 @@ class Main : CliktCommand() {
         .convert { CrossDomainBehavior.valueOf(it.toUpperCase().replace("-", "_")) }
         .default(CrossDomainBehavior.DONT_RECURSE)
 
+    private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
+
     private val logLevel by option(help = """Verbosity level:
         ```
             -q, --quiet:    no output
@@ -83,7 +85,6 @@ class Main : CliktCommand() {
 
 
     override fun run() {
-        // FIXME (MH): 4/3/21 this is shit
         log = Logger(logLevel.toInt())
         val urlDomain = getHost(url)
         log.default { "Targeting url: $url host: $urlDomain" }
@@ -92,6 +93,7 @@ class Main : CliktCommand() {
             allowedStatusCodes = allowedStatusCodes,
             url = url,
             depth = depth,
+            parseText = parseText,
             noSummary = noSummary,
             requestHeaders = requestHeaders,
             crossDomainBehavior = crossDomain,

@@ -45,7 +45,7 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config): Lis
         log.debug { "Reached maximum depth (${config.depth}) for: $visitedLinkUrl" }
         return emptyList()
     }
-    val newLinks = LinkParser.getLinks(content, visitedLinkUrl)
+    val newLinks = LinkParser.getLinks(content, visitedLinkUrl, config.parseText)
 
     val candidateLinks = newLinks.asSequence()
         .filterNot { it is Link.Mailto }
@@ -61,5 +61,7 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config): Lis
     return candidateLinks
 }
 
-private fun formatLink(visited: VisitedLink) =
-    "${visited.content.statusString} (depth: ${visited.depth}) :: ${visited.link.value} found at ${visited.source?.value ?: USER_INPUT_LINK} with text: ${visited.link.text.replace('\n', ' ')}"
+private fun formatLink(visited: VisitedLink): String {
+    val linkText = visited.link.text?.let { " with text: ${it.replace('\n', ' ')}" } ?: ""
+    return "${visited.content.statusString} (depth: ${visited.depth}) :: ${visited.link.value} found at ${visited.source?.value ?: USER_INPUT_LINK}$linkText"
+}

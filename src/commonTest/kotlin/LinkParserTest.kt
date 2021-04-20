@@ -8,13 +8,13 @@ class LinkParserTest {
 
     @Test
     fun emptyPageReturnsNoLinks() {
-        assertEquals(emptyList(), LinkParser.getLinks("", "http://webThemez.com"))
+        assertEquals(emptyList(), LinkParser.getLinks("", "http://webThemez.com", true))
     }
 
     @Test
     fun invalidUrlThrows() {
         assertFailsWith<URLParserException> {
-            assertEquals(emptyList(), LinkParser.getLinks("", ""))
+            assertEquals(emptyList(), LinkParser.getLinks("", "", true))
         }
     }
 
@@ -42,16 +42,20 @@ class LinkParserTest {
             "https://mapy.cz/s/toCP",
             "mailto:info@zahradnictvikarlov.cz",
         ).sorted()
-        val actual = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz")
+        val actual = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", false)
             .map { it.value }.sorted()
         assertEquals(expected, actual)
+        val actualWithText = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", true)
+            .map { it.value }
+        assertEquals(expected, actualWithText)
     }
 
     @Test
     fun validateLinkWithTagsInside() {
         val links = LinkParser.getLinks(
             """to <a href="/docs/s-analytics/form-model-analysis"><strong>analyse a form model</strong></a>""",
-            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/"
+            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/",
+            parseText = true
         ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
 
         assertEquals(links.size, 1)
@@ -70,7 +74,8 @@ class LinkParserTest {
         val links = LinkParser.getLinks(
             """<a href="/docs/s-analytics/form-model-analysis">analyse a form
 model</a>""",
-            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/"
+            "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/",
+            parseText = true
         ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
 
         assertEquals(links.size, 1)

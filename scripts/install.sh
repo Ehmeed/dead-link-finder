@@ -32,9 +32,3 @@ cp "${jar}" "${target_location}/" && \
  echo "java -jar ${jar} "'"$@"' > ${jar_runner} && \
  chmod +x ${jar_runner} && \
  echo "${green}Successfully installed ${jar_runner_target_name} ${version}${reset}"
-
-
-
-
-
-
