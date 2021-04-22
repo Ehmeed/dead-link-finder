@@ -33,8 +33,7 @@ class Main : CliktCommand() {
     // TODO (MH): 12/6/20 multi threading
     // TODO (MH): 1/23/21 timeout per request
     // TODO rate limiting
-
-
+    // TODO (MH): 4/28/21 client side rendered sites
 
     // TODO config object
     // TODO (MH): 12/6/20 ignore specific domains, allow custom response codes per domain

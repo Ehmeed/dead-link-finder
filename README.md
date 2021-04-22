@@ -1,6 +1,14 @@
 # Dead link finder
 
-Find links that don't work
+Find links that don't work on server-side rendered sites.
+
+## Usage
+```shell
+# basic usage
+dlfj --verbose 'https://en.wikipedia.org/wiki/Hyperlink'
+# for more options see
+dlfj --help
+```
 
 ## Build
 Compile executables:

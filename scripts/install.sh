@@ -23,12 +23,13 @@ target_name="dlf"
 [[ -f "${exe}" ]] || (echo "File not found!" && exit 1)
 cp "${exe}" "${target_location}/${target_name}" && echo "${green}Successfully installed ${target_name} ${version}${reset}"
 
-jar="./build/libs/dead-link-finder-jvm-${version}.jar"
+jar_name="dead-link-finder-jvm-${version}.jar"
+jar="./build/libs/${jar_name}"
 jar_runner_target_name="dlfj"
 jar_runner="${target_location}/${jar_runner_target_name}"
 
 [[ -f "${jar}" ]] || (echo "File not found!" && exit 1)
 cp "${jar}" "${target_location}/" && \
- echo "java -jar ${jar} "'"$@"' > ${jar_runner} && \
+ echo "java -jar ${target_location}/${jar_name} "'"$@"' > ${jar_runner} && \
  chmod +x ${jar_runner} && \
  echo "${green}Successfully installed ${jar_runner_target_name} ${version}${reset}"

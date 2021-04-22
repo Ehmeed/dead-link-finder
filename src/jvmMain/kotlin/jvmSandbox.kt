@@ -4,10 +4,7 @@ fun main() = runBlocking {
 
     val args = arrayOf(
         "--verbose",
-        "-H",
-        "-d",
-        "4",
-        "https://zoe.lundegaard.ai/docs",
+        "https://en.wikipedia.org/wiki/Hyperlink",
     )
     Main.main(args)
 }
