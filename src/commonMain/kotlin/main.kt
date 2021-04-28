@@ -11,7 +11,6 @@ import kotlin.time.measureTime
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // TODO try to parse text by some simple algorithm from names.txt
     // TODO (MH): 4/18/21 print version and exit
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe
     // fix tests
@@ -42,19 +41,19 @@ class Main : CliktCommand() {
     private val url: String by argument(help = "Url to target")
     private val depth: Int by option(help = "Max recursion depth", names = arrayOf("-d", "--depth")).int()
         .restrictTo(min = 0)
-        .default(99)
+        .default(1_000_000)
 
-    private val timeout: Int by option(help = "Timeout per request in milliseconds").int()
+    private val timeout: Int by option(help = "Timeout per request in milliseconds (default 5000ms)").int()
         .restrictTo(min = 1)
         .default(5000)
 
-    private val parseText: Boolean by option( "--show-link-text", help = "Shows text displayed on the element with each link. This will highly slow down execution.")
+    private val parseText: Boolean by option( "--show-text", help = "Shows text displayed on the element with each link. This is inaccurate and also will slow down execution.")
         .flag(default = false)
 
-    private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H User-Agent:Mozilla:4.0")
+    private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H 'User-Agent:Mozilla:4.0'")
         .convert {
             val split = it.split(":", limit = 2)
-            require(split.size == 2) { "Invalid header format" }
+            require(split.size == 2) { "Invalid header format use: header name:header value" }
             split[0] to split[1]
         }.multiple()
 

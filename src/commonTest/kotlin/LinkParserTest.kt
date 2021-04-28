@@ -2,8 +2,6 @@ import domain.Link
 import io.ktor.http.*
 import kotlin.test.*
 
-expect val zahradnictviKarlovHtml: String
-
 class LinkParserTest {
 
     @Test
@@ -46,7 +44,7 @@ class LinkParserTest {
             .map { it.value }.sorted()
         assertEquals(expected, actual)
         val actualWithText = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", true)
-            .map { it.value }
+            .map { it.value }.sorted()
         assertEquals(expected, actualWithText)
     }
 
@@ -61,7 +59,7 @@ class LinkParserTest {
         assertEquals(links.size, 1)
         val actual = links.single()
 
-        val expected = Link.RootRelative("<strong>analyse a form model</strong>",
+        val expected = Link.RootRelative("analyse a form model",
             "/docs/s-analytics/form-model-analysis",
             "https://zoe.lundegaard.ai/")
 
@@ -90,4 +88,56 @@ model</a>""",
         assertEquals(expected.value, actual.value)
     }
 
+    @Test
+    fun `stopship`() {
+        names.split("\n")
+            .map { LinkParser.extractText(it) }
+            .sortedBy { it?.length }
+            .forEach { println(it) }
+    }
+
+    @Test
+    fun parsingTextSimple() {
+        val input = """
+            Some text
+        """.trimIndent()
+
+        assertEquals("Some text", LinkParser.extractText(input))
+    }
+
+    @Test
+    fun parsingTextSimple2() {
+        val input = """
+            <b>Some text</b>
+        """.trimIndent()
+
+        assertEquals("Some text", LinkParser.extractText(input))
+    }
+
+    @Test
+    fun parsingTextStyle() {
+        val input = """
+            <style data-emotion-css="15k7mhn">.css-15k7mhn{box-sizing:border-box;margin:0;min-width:0;padding:1px 2px;color:#e8852b;}</style><code class="css-15k7mhn">register</code>
+        """.trimIndent()
+
+        assertEquals("register", LinkParser.extractText(input))
+    }
+
+    @Test
+    fun parsingTextTitle() {
+        val input = """
+            <style data-emotion-css="1h2op9t">.css-1h2op9t{box-sizing:border-box;margin:0;min-width:0;max-width:100%;height:auto;margin-bottom:8px;}</style><img alt="Zoe Behavioral Prescoring" title="Zoe Behavioral Prescoring" src="/docs/static/dashboard-aa67c95b9f0f521fd282cd5bc5bfd0cf.png" class="css-1h2op9t"/>
+        """.trimIndent()
+
+        assertEquals("Zoe Behavioral Prescoring", LinkParser.extractText(input))
+    }
+
+    @Test
+    fun parsingTextComplex() {
+        val input = """
+            <div title="behavior_input_changes_distance" class="css-67ghj5">behavior_input_changes_distance</div><div class="css-13gjugf">1 feature<button class="css-xabruz"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentcolor"><rect width="24" height="24" transform="rotate(-90 12 12)" opacity="0"></rect><path d="M10 19a1 1 0 0 1-.64-.23 1 1 0 0 1-.13-1.41L13.71 12 9.39 6.63a1 1 0 0 1 .15-1.41 1 1 0 0 1 1.46.15l4.83 6a1 1 0 0 1 0 1.27l-5 6A1 1 0 0 1 10 19z"></path></svg></button></div>
+        """.trimIndent()
+
+        assertEquals("behavior_input_changes_distance", LinkParser.extractText(input))
+    }
 }

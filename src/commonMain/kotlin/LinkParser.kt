@@ -33,9 +33,20 @@ object LinkParser {
 
     private fun parseLinks(html: String, parseText: Boolean): Sequence<Pair<String, String?>> = if (parseText) {
         HREF_WITH_TEXT.findAll(html)
-            .map { it.groupValues[1] to it.groupValues[2] }
+            .map { it.groupValues[1] to extractText(it.groupValues[2]) }
     } else {
         HREF.findAll(html)
             .map { it.groupValues[1] to null }
+    }
+
+    private val INSIDE_TAG = Regex(""">([^<>]*)<""")
+    private val TITLE = Regex("""title="(.*?)"""")
+    internal fun extractText(htmlFragment: String): String? {
+        if (!htmlFragment.trim().startsWith("<")) return htmlFragment
+        val bestMatch = INSIDE_TAG.findAll(htmlFragment)
+            .map { it.groupValues[1] }
+            .filter { it.isNotBlank() && it.length < 60 }
+            .maxByOrNull { it.length }
+        return bestMatch ?: TITLE.find(htmlFragment)?.groupValues?.get(1)
     }
 }
