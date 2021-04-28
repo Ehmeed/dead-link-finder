@@ -1,8 +1,5 @@
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertFalse
-
 
 class LinkStoreTest {
 
@@ -11,5 +8,4 @@ class LinkStoreTest {
         val store = LinkStore()
         assertFalse(store.hasNextToVisit())
     }
-
 }

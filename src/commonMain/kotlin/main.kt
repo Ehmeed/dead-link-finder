@@ -18,14 +18,12 @@ class Main : CliktCommand() {
     // shutdown hook
     /** in java runTime.getRuntime - but it executes also on succcess - somehow unit to be both same
      *  signal(SIGINT, staticCFunction<Int, Unit> {
-            println("Exit!")
-        })
+     println("Exit!")
+     })
      */
-    // TODO (MH): 4/3/21 exit code - use expect actual - easy
     // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
     // TODO (MH): 4/18/21 allow multiple input urls? maybe hard because main domain etc
     // TODO (MH): 4/20/21 putting unreachable URL as argument crashes with exception
-
 
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
     // TODO (MH): 12/6/20 retry
@@ -47,7 +45,7 @@ class Main : CliktCommand() {
         .restrictTo(min = 1)
         .default(5000)
 
-    private val parseText: Boolean by option( "--show-text", help = "Shows text displayed on the element with each link. This is inaccurate and also will slow down execution.")
+    private val parseText: Boolean by option("--show-text", help = "Shows text displayed on the element with each link. This is inaccurate and also will slow down execution.")
         .flag(default = false)
 
     private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H 'User-Agent:Mozilla:4.0'")
@@ -61,30 +59,33 @@ class Main : CliktCommand() {
         IGNORE, DONT_RECURSE, UNCHANGED
     }
 
-    private val crossDomain by option(help = """
+    private val crossDomain by option(
+        help = """
         Behavior for links from other domains (ignore|dont-recurse|unchanged) default: dont-recurse        
-        """.trimIndent())
+        """.trimIndent()
+    )
         .choice("ignore", "dont-recurse", "unchanged")
         .convert { CrossDomainBehavior.valueOf(it.toUpperCase().replace("-", "_")) }
         .default(CrossDomainBehavior.DONT_RECURSE)
 
     private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
 
-    private val logLevel by option(help = """Verbosity level:
+    private val logLevel by option(
+        help = """Verbosity level:
         ```
             -q, --quiet:    no output
             default:        prints only dead links
             -v, --verbose:  prints all targeted links
             --debug:        debug output
         ```
-    """.trimIndent()).switch(
-        "-q" to "0",       // print nothing
-        "--quiet" to "0",  // print nothing
-        "-v" to "2",       // verbose info
-        "--verbose" to "2",// verbose info
-        "--debug" to "3",  // print everything
-    ).default("1")  // print only summary
-
+        """.trimIndent()
+    ).switch(
+        "-q" to "0", // print nothing
+        "--quiet" to "0", // print nothing
+        "-v" to "2", // verbose info
+        "--verbose" to "2", // verbose info
+        "--debug" to "3", // print everything
+    ).default("1") // print only summary
 
     override fun run() {
         log = Logger(logLevel.toInt())
@@ -103,7 +104,6 @@ class Main : CliktCommand() {
             urlDomain = urlDomain,
             timeout = timeout,
         )
-
     }
 
     companion object {

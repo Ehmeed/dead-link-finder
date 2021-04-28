@@ -75,13 +75,9 @@ kotlin {
             }
         }
     }
-
 }
 
-
-
 // example how to declare common dependency for all modules
-//dependencies {
+// dependencies {
 //    commonMainImplementation("com.github.ajalt.clikt:clikt:3.0.1")
-//}
-
+// }

@@ -59,9 +59,11 @@ class LinkParserTest {
         assertEquals(links.size, 1)
         val actual = links.single()
 
-        val expected = Link.RootRelative("analyse a form model",
+        val expected = Link.RootRelative(
+            "analyse a form model",
             "/docs/s-analytics/form-model-analysis",
-            "https://zoe.lundegaard.ai/")
+            "https://zoe.lundegaard.ai/"
+        )
 
         assertEquals(expected.rawValue, actual.rawValue)
         assertEquals(expected.text, actual.text)
@@ -79,21 +81,15 @@ model</a>""",
         assertEquals(links.size, 1)
         val actual = links.single()
 
-        val expected = Link.RootRelative("analyse a form\nmodel",
+        val expected = Link.RootRelative(
+            "analyse a form\nmodel",
             "/docs/s-analytics/form-model-analysis",
-            "https://zoe.lundegaard.ai/")
+            "https://zoe.lundegaard.ai/"
+        )
 
         assertEquals(expected.rawValue, actual.rawValue)
         assertEquals(expected.text, actual.text)
         assertEquals(expected.value, actual.value)
-    }
-
-    @Test
-    fun `stopship`() {
-        names.split("\n")
-            .map { LinkParser.extractText(it) }
-            .sortedBy { it?.length }
-            .forEach { println(it) }
     }
 
     @Test

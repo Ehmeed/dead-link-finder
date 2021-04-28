@@ -8,15 +8,15 @@ sealed class LinkContent {
         override val statusString: String = "OK"
         override val isSuccess: Boolean = true
     }
-    object UnreadableSuccess: LinkContent() {
+    object UnreadableSuccess : LinkContent() {
         override val statusString: String = "OK"
         override val isSuccess: Boolean = true
     }
-    data class InvalidStatusCode(val statusCode: Int): LinkContent() {
+    data class InvalidStatusCode(val statusCode: Int) : LinkContent() {
         override val statusString: String = "FAIL (status: $statusCode)"
         override val isSuccess: Boolean = false
     }
-    data class Unreachable(val message: String): LinkContent() {
+    data class Unreachable(val message: String) : LinkContent() {
         override val statusString: String = "FAIL ($message)"
         override val isSuccess: Boolean = false
     }
@@ -24,7 +24,5 @@ sealed class LinkContent {
     object Timeout : LinkContent() {
         override val statusString = "TIMEOUT"
         override val isSuccess = false
-
     }
 }
-
