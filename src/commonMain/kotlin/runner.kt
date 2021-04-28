@@ -36,7 +36,7 @@ suspend fun runner(config: Config) {
             deadLinks.forEach { log.default { formatLink(it) } }
         }
     }
-
+    exit(if (deadLinks.isEmpty()) 0 else 1)
 }
 
 private fun getNewLinks(content: String, link: ToVisitLink, config: Config): List<ToVisitLink> {
@@ -65,3 +65,5 @@ private fun formatLink(visited: VisitedLink): String {
     val linkText = visited.link.text?.let { " with text: ${it.replace('\n', ' ')}" } ?: ""
     return "${visited.content.statusString} (depth: ${visited.depth}) :: ${visited.link.value} found at ${visited.source?.value ?: USER_INPUT_LINK}$linkText"
 }
+
+expect fun exit(status: Int): Nothing

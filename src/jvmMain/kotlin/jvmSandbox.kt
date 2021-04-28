@@ -6,6 +6,7 @@ fun main() = runBlocking {
         "--verbose",
         "--timeout", "100",
         "--cross-domain", "ignore",
+        "-d", "3",
         "http://localhost:8084/docs",
     )
     Main.main(args)
