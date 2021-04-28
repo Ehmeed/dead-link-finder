@@ -31,7 +31,6 @@ class Main : CliktCommand() {
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
     // TODO (MH): 12/6/20 retry
     // TODO (MH): 12/6/20 multi threading
-    // TODO (MH): 1/23/21 timeout per request
     // TODO rate limiting
     // TODO (MH): 4/28/21 client side rendered sites
 
@@ -45,7 +44,12 @@ class Main : CliktCommand() {
         .restrictTo(min = 0)
         .default(99)
 
-    private val parseText: Boolean by option("--show-link-text", help = "Shows text displayed on the element with each link. This will highly slow down execution.").flag(default = false)
+    private val timeout: Int by option(help = "Timeout per request in milliseconds").int()
+        .restrictTo(min = 1)
+        .default(5000)
+
+    private val parseText: Boolean by option( "--show-link-text", help = "Shows text displayed on the element with each link. This will highly slow down execution.")
+        .flag(default = false)
 
     private val requestHeaders: List<Pair<String, String>> by option("-H", help = "Add header, e.g.: -H User-Agent:Mozilla:4.0")
         .convert {
@@ -97,7 +101,8 @@ class Main : CliktCommand() {
             requestHeaders = requestHeaders,
             crossDomainBehavior = crossDomain,
             logLevel = logLevel,
-            urlDomain = urlDomain
+            urlDomain = urlDomain,
+            timeout = timeout,
         )
 
     }

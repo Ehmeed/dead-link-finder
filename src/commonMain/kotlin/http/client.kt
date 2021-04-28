@@ -9,11 +9,18 @@ import io.ktor.utils.io.core.*
 import io.ktor.utils.io.errors.*
 import log
 
-class Client(private val allowedStatusCodes: List<Int>, private val requestHeaders: List<Pair<String, String>>) {
+class Client(
+    private val allowedStatusCodes: List<Int>,
+    private val requestHeaders: List<Pair<String, String>>,
+    timeout: Int,
+) {
 
     private val httpClient = HttpClient() {
         expectSuccess = false
         followRedirects = true
+        install(HttpTimeout) {
+            requestTimeoutMillis = timeout.toLong()
+        }
         HttpResponseValidator {
             validateResponse { response ->
                 val statusCode = response.status.value
@@ -41,5 +48,8 @@ class Client(private val allowedStatusCodes: List<Int>, private val requestHeade
     } catch (ex: IOException) {
         log.debug { "Failed to get: $url $ex" }
         LinkContent.Unreachable(ex.message ?: "unknown reason")
+    } catch (ex: HttpRequestTimeoutException) {
+        log.debug { "Timeout getting $url" }
+        LinkContent.Timeout
     }
 }

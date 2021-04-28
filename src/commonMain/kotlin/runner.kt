@@ -7,7 +7,7 @@ private const val USER_INPUT_LINK = "<given by user input>"
 
 suspend fun runner(config: Config) {
     val linksStore = LinkStore()
-    val httpClient = Client(config.allowedStatusCodes, config.requestHeaders)
+    val httpClient = Client(config.allowedStatusCodes, config.requestHeaders, config.timeout)
 
     httpClient.use { client ->
         linksStore.addToVisit(listOf(ToVisitLink(Link.Absolute(USER_INPUT_LINK, config.url), source = null, depth = 0)))

@@ -4,7 +4,9 @@ fun main() = runBlocking {
 
     val args = arrayOf(
         "--verbose",
-        "https://en.wikipedia.org/wiki/Hyperlink",
+        "--timeout", "100",
+        "--cross-domain", "ignore",
+        "http://localhost:8084/docs",
     )
     Main.main(args)
 }

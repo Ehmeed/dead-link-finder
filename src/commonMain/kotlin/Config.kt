@@ -8,4 +8,5 @@ data class Config(
     val crossDomainBehavior: Main.CrossDomainBehavior,
     val logLevel: String,
     val urlDomain: String,
+    val timeout: Int,
 )

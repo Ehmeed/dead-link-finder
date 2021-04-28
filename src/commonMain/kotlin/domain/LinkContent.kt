@@ -20,5 +20,11 @@ sealed class LinkContent {
         override val statusString: String = "FAIL ($message)"
         override val isSuccess: Boolean = false
     }
+
+    object Timeout : LinkContent() {
+        override val statusString = "TIMEOUT"
+        override val isSuccess = false
+
+    }
 }
 
