@@ -4,8 +4,8 @@ plugins {
     kotlin("multiplatform") version "1.4.31"
 }
 
-group = "me.ehmeed"
-version = "0.1"
+group = "org.ehmeed"
+version = "1.0"
 
 val kotlinVersion = "1.5.0"
 // ktor 1.5 fails on mutability of frozen client
