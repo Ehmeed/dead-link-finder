@@ -7,7 +7,7 @@ plugins {
 group = "me.ehmeed"
 version = "0.1"
 
-val kotlinVersion = "1.4.31"
+val kotlinVersion = "1.5.0"
 // ktor 1.5 fails on mutability of frozen client
 val ktorVersion = "1.4.0"
 
@@ -18,7 +18,10 @@ repositories {
 kotlin {
     jvm {
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-            kotlinOptions { jvmTarget = "1.8" }
+            kotlinOptions {
+                jvmTarget = "1.8"
+                freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+            }
         }
         tasks.withType<Jar> {
             manifest {

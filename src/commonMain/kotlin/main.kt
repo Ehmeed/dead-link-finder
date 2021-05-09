@@ -12,7 +12,9 @@ private lateinit var config: Config
 
 class Main : CliktCommand() {
     // TODO (MH): 4/18/21 print version and exit
-    // TODO (MH): 4/18/21 nice output formatting with tabs maybe
+    // TODO (MH): 4/18/21 nice output formatting with tabs maybe so it';s  machine readable
+    // TODO (MH): 5/3/21 cached builder; jvm image; native image
+    // TODO (MH): 5/3/21 github workflow to build images
     // fix tests
     // examples in readme
     // shutdown hook
