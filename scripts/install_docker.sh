@@ -3,7 +3,7 @@ set -euo pipefail
 
 version=${1:-latest}
 
-push="${1:-""}"
+push="${2:-""}"
 
 test $(basename $(pwd)) == "dead-link-finder" || (echo "Run from root repository directory" && exit 1)
 
@@ -14,7 +14,6 @@ docker build -f Dockerfile.jvm -t docker.pkg.github.com/ehmeed/dead-link-finder/
 docker build -f Dockerfile.native -t docker.pkg.github.com/ehmeed/dead-link-finder/dlf:${version} .
 
 if [[ ${push} == "--push" ]]; then
-  echo ""
-  # docker push docker.pkg.github.com/ehmeed/dead-link-finder/dlfj:${version}
-  # docker push docker.pkg.github.com/ehmeed/dead-link-finder/dlf:${version}
+  docker push docker.pkg.github.com/ehmeed/dead-link-finder/dlfj:${version}
+  docker push docker.pkg.github.com/ehmeed/dead-link-finder/dlf:${version}
 fi
