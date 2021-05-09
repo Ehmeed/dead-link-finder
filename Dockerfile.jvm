@@ -1,0 +1,10 @@
+FROM adoptopenjdk/openjdk11:x86_64-debian-jre-11.0.11_9
+
+ARG BIN_DIR="/dead-link-finder/bin"
+
+RUN mkdir -p $BIN_DIR
+
+COPY --from=docker.pkg.github.com/ehmeed/dead-link-finder/dlf-builder:latest $BIN_DIR $BIN_DIR
+ENV BIN_DIR=$BIN_DIR
+ENTRYPOINT ["/dead-link-finder/bin/dlfj"]
+CMD ["--help"]

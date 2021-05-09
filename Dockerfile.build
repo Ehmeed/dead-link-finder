@@ -1,0 +1,24 @@
+FROM adoptopenjdk/openjdk11:x86_64-debian-jdk-11.0.11_9-slim as builder
+
+ARG BUILD_DIR="/dead-link-finder"
+
+RUN apt-get update && apt-get install -yq \
+        libncurses-dev \
+        libncurses5 \
+        libcurl4-openssl-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY build.gradle.kts $BUILD_DIR/
+COPY gradlew  $BUILD_DIR/
+COPY gradle.properties $BUILD_DIR/
+COPY gradle $BUILD_DIR/gradle
+
+WORKDIR $BUILD_DIR
+# forcing download of gradle and konan and dependencies (cachable by docker)
+RUN mkdir -p src/nativeMain/kotlin && touch src/nativeMain/kotlin/main.kt
+RUN ./gradlew compileKotlinNative
+RUN rm -rf src
+
+COPY / .
+RUN mkdir bin && ./scripts/install.sh --rebuild $BUILD_DIR/bin

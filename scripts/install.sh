@@ -21,11 +21,10 @@ fi
 
 version=$(grep 'version = ' build.gradle.kts | cut -d '=' -f2 | tr -d '" ')
 
-# exe="./build/bin/native/releaseExecutable/dead-link-finder.kexe"
-# target_name="dlf"
-#
-# [[ -f "${exe}" ]] || (echo "File not found!" && exit 1)
-# cp "${exe}" "${target_location}/${target_name}" && echo "${green}Successfully installed ${target_name} ${version}${reset}"
+exe="./build/bin/native/releaseExecutable/dead-link-finder.kexe"
+target_name="dlf"
+[[ -f "${exe}" ]] || (echo "File not found!" && exit 1)
+cp "${exe}" "${target_location}/${target_name}" && echo "${green}Successfully installed ${target_name} ${version}${reset}"
 
 jar_name="dead-link-finder-jvm-${version}.jar"
 jar="./build/libs/${jar_name}"

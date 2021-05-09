@@ -5,7 +5,10 @@ Find links that don't work on server-side rendered sites.
 ## Usage
 ```shell
 # basic usage
-dlfj --verbose 'https://en.wikipedia.org/wiki/Hyperlink'
+dlfj --verbose 'https://json.org/example.html'
+# or using docker
+docker run --rm docker.pkg.github.com/ehmeed/dead-link-finder/dlfj:latest --verbose 'https://json.org/example.html'
+docker run --rm docker.pkg.github.com/ehmeed/dead-link-finder/dlf:latest --verbose 'https://json.org/example.html'
 # for more options see
 dlfj --help
 ```

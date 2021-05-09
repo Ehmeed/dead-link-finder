@@ -1,0 +1,16 @@
+# todo choose base
+FROM debian:buster-slim
+
+RUN apt-get update && apt-get install -yq \
+    libcurl4-openssl-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ARG BIN_DIR="/dead-link-finder/bin"
+
+RUN mkdir -p $BIN_DIR
+
+COPY --from=docker.pkg.github.com/ehmeed/dead-link-finder/dlf-builder:latest $BIN_DIR/dlf $BIN_DIR
+ENV BIN_DIR=$BIN_DIR
+ENTRYPOINT ["/dead-link-finder/bin/dlf"]
+CMD ["--help"]
