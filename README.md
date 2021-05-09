@@ -7,6 +7,8 @@ There are two packages:
  - `dlf` - native - smaller docker image (80 MB)
  - `dlfj`- running on JVM - much faster, larger docker image (300 MB)
 
+For now, only dockerized versions are avaiable, but you can build binaries yourself, see guide at the bottom of the file.
+
 All examples will use `dlfj` but in any of them you can replace it with `dlf`.
 ```shell
 # basic usage - crawl all links recursively with no limit
