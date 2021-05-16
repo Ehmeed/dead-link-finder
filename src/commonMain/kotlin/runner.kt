@@ -7,6 +7,7 @@ private const val USER_INPUT_LINK = "<given by user input>"
 
 suspend fun runner(config: Config) {
     val linksStore = LinkStore()
+    installShutdownHook(linksStore, config)
     val httpClient = Client(config.allowedStatusCodes, config.requestHeaders, config.timeout)
 
     httpClient.use { client ->
@@ -25,18 +26,8 @@ suspend fun runner(config: Config) {
         }
     }
 
-    val visitedLinks = linksStore.visited.values
-    val visitedCount = visitedLinks.size
-    val deadLinks = visitedLinks.filter { !it.content.isSuccess }
-    if (!config.noSummary) {
-        if (deadLinks.isEmpty()) {
-            log.default { "No dead links found out of $visitedCount visited urls" }
-        } else {
-            log.default { "Found ${deadLinks.size} dead links out of $visitedCount visited urls:" }
-            deadLinks.forEach { log.default { formatLink(it) } }
-        }
-    }
-    exit(if (deadLinks.isEmpty()) 0 else 1)
+    val hasDeadLinks = printSummaryAndGetStatus(linksStore, config.noSummary)
+    exit(if (hasDeadLinks) 1 else 0)
 }
 
 private fun getNewLinks(content: String, link: ToVisitLink, config: Config): List<ToVisitLink> {
@@ -61,9 +52,26 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config): Lis
     return candidateLinks
 }
 
+internal fun printSummaryAndGetStatus(linksStore: LinkStore, disableSummary: Boolean): Boolean {
+    val visitedLinks = linksStore.visited.values
+    val deadLinks = visitedLinks.filter { !it.content.isSuccess }
+    if (!disableSummary) {
+        val visitedCount = visitedLinks.size
+        if (deadLinks.isEmpty()) {
+            log.default { "No dead links found out of $visitedCount visited urls" }
+        } else {
+            log.default { "Found ${deadLinks.size} dead links out of $visitedCount visited urls:" }
+            deadLinks.forEach { log.default { formatLink(it) } }
+        }
+    }
+    return deadLinks.isEmpty()
+}
+
 private fun formatLink(visited: VisitedLink): String {
     val linkText = visited.link.text?.let { " with text: ${it.replace('\n', ' ')}" } ?: ""
     return "${visited.content.statusString} (depth: ${visited.depth}) :: ${visited.link.value} found at ${visited.source?.value ?: USER_INPUT_LINK}$linkText"
 }
 
 expect fun exit(status: Int): Nothing
+
+expect fun installShutdownHook(store: LinkStore, config: Config)

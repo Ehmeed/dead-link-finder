@@ -11,31 +11,25 @@ import kotlin.time.measureTime
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // TODO (MH): 5/9/21 better base image for native binary
     // TODO (MH): 4/18/21 print version and exit
+    // TODO (MH): 4/28/21 client side rendered sites (probably for jvm only)
     // TODO (MH): 5/9/21 consider fail fast flag
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe so it';s  machine readable
+    // TODO (MH): 5/9/21 better base image for native binary
     // TODO (MH): 5/3/21 cached builder; jvm image; native image
     // TODO (MH): 5/3/21 github workflow to build images
     // fix tests
-    // examples in readme
-    // shutdown hook
-    /** in java runTime.getRuntime - but it executes also on succcess - somehow unit to be both same
-     *  signal(SIGINT, staticCFunction<Int, Unit> {
-     println("Exit!")
-     })
-     */
+
     // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
-    // TODO (MH): 4/18/21 allow multiple input urls? maybe hard because main domain etc
     // TODO (MH): 4/20/21 putting unreachable URL as argument crashes with exception
 
     // TODO (MH): 1/23/21 when found same link from multiple sources, shows only the first one
     // TODO (MH): 12/6/20 retry
     // TODO (MH): 12/6/20 multi threading
     // TODO rate limiting
-    // TODO (MH): 4/28/21 client side rendered sites
 
-    // TODO config object
+
+    // TODO config json file
     // TODO (MH): 12/6/20 ignore specific domains, allow custom response codes per domain
     // TODO (MH): 1/13/21 allow to customize this
     private val allowedStatusCodes: List<Int> = (200..300).toList()
