@@ -17,7 +17,6 @@ class Main : CliktCommand() {
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe so it';s  machine readable
     // TODO (MH): 5/9/21 better base image for native binary
     // TODO (MH): 5/3/21 cached builder; jvm image; native image
-    // TODO (MH): 5/3/21 github workflow to build images
     // fix tests
 
     // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
