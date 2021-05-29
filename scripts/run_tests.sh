@@ -28,27 +28,47 @@ mock_server_pid=($!)
 sleep 1
 
 test_case() {
-  # test_case exe target args expected
+  # test_case exe url case
+  # case
+  #   - path
+  #   - args
+  #   - expected_visited
+  #   - expected_dead
   exe=$1
-  target=$2
-  args=$3
-  expected=$(echo -e $4)
-  echo "Trying: ${target} with args: ${args}" >&2
-  echo -e "Expected: ${expected}" >&2
+  case=$3
+  target="${2}"$(echo $case | jq '.path' | tr -d '"')
+  args=$(echo $case | jq '.args' | tr -d '"')
+  expected_visited=$(echo $case | jq '.expected_visited' | tr -d '"')
+  expected_dead=$(echo $case | jq '.expected_dead' | tr -d '"')
+  expected_status=$(( expected_dead == 0 ? 0 : 1 ))
+
+  echo "Calling: ${target} with args: ${args}" >&2
+  echo "Expected visited: ${expected_visited}" >&2
+  echo "Expected dead: ${expected_dead}" >&2
+  echo "Expected return code: ${expected_status}" >&2
+  echo >&2
   actual=$(${exe} ${args} ${target})
+  actual_status=$?
   echo "Actual: ${actual}" >&2
-  if [ "${actual}" == "${expected}" ]; then
-    status=true
+  results=$(echo $actual | sed -En -e '/No dead links/ s/.*No dead links found out of ([0-9]+) visited urls.*/\1 0/ p' -e '/Found [0-9]+ dead links out of [0-9]+ visited urls/ s/.*Found ([0-9]+) dead links out of ([0-9]+) visited urls:.*/\2 \1/ p')
+  actual_visited=$(echo $results | cut -d' ' -f1)
+  actual_dead=$(echo $results | cut -d' ' -f2)
+  echo "Actual visited: ${actual_visited}" >&2
+  echo "Actual dead: ${actual_dead}" >&2
+  echo "Actual return code: ${actual_status}" >&2
+
+  if [ "${actual_visited}" == "${expected_visited}" ] && [ "${actual_dead}" == "${expected_dead}" ] && [ "${actual_status}" == "${expected_status}" ]; then
+    passed=true
   else
-    status=false
+    passed=false
   fi
-  if [[ "${status}" = true ]]; then
+  if [[ "${passed}" = true ]]; then
      echo "${green}OK${reset}" >&2
   else
      echo "${red}Failed!${reset}" >&2
   fi
-  echo "--------------------------------" >&2
-  echo "${status}"
+  echo "__________________________________________________________________________________________________________" >&2
+  echo "${passed}"
 }
 
 
@@ -57,15 +77,13 @@ executables=("${jvm_exe}" "${native_exe}")
 total_tests=0
 failed_tests=0
 for executable in "${executables[@]}"; do
-  echo "--------------------------------"
+  echo "-----------------------------------------------------------------------------------------------------------"
   echo "Testing for ${executable}"
-  echo "--------------------------------" && echo "--------------------------------"
+  echo "-----------------------------------------------------------------------------------------------------------"
+  echo "-----------------------------------------------------------------------------------------------------------"
   while read case; do
-    target=$(echo $case | jq '.target' | tr -d '"')
-    args=$(echo $case | jq '.args' | tr -d '"')
-    expected=$(echo $case | jq '.expected' | tr -d '"')
-    status=$(test_case "${executable}" "${url}${target}" "${args}" "${expected}")
-    if [[ "${status}" = false ]]; then
+    passed=$(test_case "${executable}" "${url}" "${case}")
+    if [[ "${passed}" = false ]]; then
       failed_tests=$((failed_tests + 1))
     fi
     total_tests=$((total_tests + 1))

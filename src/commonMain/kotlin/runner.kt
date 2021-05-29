@@ -64,7 +64,7 @@ internal fun printSummaryAndGetStatus(linksStore: LinkStore, disableSummary: Boo
             deadLinks.forEach { log.default { formatLink(it) } }
         }
     }
-    return deadLinks.isEmpty()
+    return deadLinks.isNotEmpty()
 }
 
 private fun formatLink(visited: VisitedLink): String {

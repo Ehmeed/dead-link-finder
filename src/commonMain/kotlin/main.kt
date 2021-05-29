@@ -12,12 +12,11 @@ private lateinit var config: Config
 
 class Main : CliktCommand() {
     // TODO (MH): 4/18/21 print version and exit
-    // TODO (MH): 4/28/21 client side rendered sites (probably for jvm only)
+    // TODO (MH): 4/28/21 client side rendered sites (probably for jvm only - HtmlUnit)
     // TODO (MH): 5/9/21 consider fail fast flag
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe so it';s  machine readable
     // TODO (MH): 5/9/21 better base image for native binary
     // TODO (MH): 5/3/21 cached builder; jvm image; native image
-    // fix tests
 
     // TODO (MH): 2/11/21 skip fragments(anchors) = study (maybe they return 200 everytime) - check if it is possible to verify anchor existence
     // TODO (MH): 4/20/21 putting unreachable URL as argument crashes with exception

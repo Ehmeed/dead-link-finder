@@ -1,88 +1,105 @@
 [
   {
-    "target": "/",
+    "path": "/",
     "args": "",
-    "expected": "No dead links found out of 1 visited urls"
+    "expected_visited": "1",
+    "expected_dead": "0"
   },
   {
-    "target": "/",
+    "path": "/",
     "args": "--no-summary",
-    "expected": ""
+    "expected_visited": "",
+    "expected_dead": ""
   },
   {
-    "target": "/redirect",
+    "path": "/redirect",
     "args": "",
-    "expected": "No dead links found out of 1 visited urls"
+    "expected_visited": "1",
+    "expected_dead": "0"
   },
   {
-    "target": "/same-domain",
+    "path": "/same-domain",
     "args": "",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   },
   {
-    "target": "/same-domain",
+    "path": "/same-domain",
     "args": "--depth 0",
-    "expected": "No dead links found out of 1 visited urls"
+    "expected_visited": "1",
+    "expected_dead": "0"
   },
   {
-    "target": "/empty",
+    "path": "/empty",
     "args": "",
-    "expected": "No dead links found out of 1 visited urls"
+    "expected_visited": "1",
+    "expected_dead": "0"
   },
   {
-    "target": "/forbidden",
+    "path": "/forbidden",
     "args": "",
-    "expected": "Found 1 dead links out of 1 visited urls:\\nhttp://www.localhost:5000/forbidden  <- <given by user input> :: FAIL (status: 403)"
+    "expected_visited": "1",
+    "expected_dead": "1"
   },
   {
-    "target": "/cross-domain",
+    "path": "/cross-domain",
     "args": "",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   },
   {
-    "target": "/cross-domain",
+    "path": "/cross-domain",
     "args": "--cross-domain dont-recurse",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   },
   {
-    "target": "/cross-domain",
+    "path": "/cross-domain",
     "args": "--cross-domain ignore",
-    "expected": "No dead links found out of 1 visited urls"
+    "expected_visited": "1",
+    "expected_dead": "0"
   },
   {
-    "target": "/depth",
+    "path": "/depth",
     "args": "",
-    "expected": "No dead links found out of 3 visited urls"
+    "expected_visited": "3",
+    "expected_dead": "0"
   },
   {
-    "target": "/depth",
+    "path": "/depth",
     "args": "--depth 1",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   }
 ,
   {
-    "target": "/multiple",
+    "path": "/multiple",
     "args": "",
-    "expected": "No dead links found out of 3 visited urls"
+    "expected_visited": "3",
+    "expected_dead": "0"
   },
   {
-    "target": "/multiple-same",
+    "path": "/multiple-same",
     "args": "",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   },
   {
-    "target": "/root-relative",
+    "path": "/root-relative",
     "args": "",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   },
   {
-    "target": "/relative-dead",
+    "path": "/relative-dead",
     "args": "",
-    "expected": "Found 1 dead links out of 2 visited urls:\\nhttp://www.localhost:5000/relative-dead/dead <- http://www.localhost:5000/relative-dead :: FAIL (status: 404)"
+    "expected_visited": "2",
+    "expected_dead": "1"
   },
   {
-    "target": "/anchor",
+    "path": "/anchor",
     "args": "",
-    "expected": "No dead links found out of 2 visited urls"
+    "expected_visited": "2",
+    "expected_dead": "0"
   }
 ]
