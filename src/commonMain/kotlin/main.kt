@@ -4,14 +4,12 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
-import http.UrlExt.getHost
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 private lateinit var config: Config
 
 class Main : CliktCommand() {
-    // TODO (MH): 4/18/21 print version and exit
     // TODO (MH): 4/28/21 client side rendered sites (probably for jvm only - HtmlUnit)
     // TODO (MH): 5/9/21 consider fail fast flag
     // TODO (MH): 4/18/21 nice output formatting with tabs maybe so it';s  machine readable
@@ -85,8 +83,10 @@ class Main : CliktCommand() {
 
     override fun run() {
         log = Logger(logLevel.toInt())
-        val urlDomain = getHost(url)
-        log.default { "Targeting url: $url host: $urlDomain" }
+        if (url == "version") {
+            log.force { "Dead link finder $VERSION" }
+            exit(0)
+        }
 
         config = Config(
             allowedStatusCodes = allowedStatusCodes,
@@ -97,7 +97,6 @@ class Main : CliktCommand() {
             requestHeaders = requestHeaders,
             crossDomainBehavior = crossDomain,
             logLevel = logLevel,
-            urlDomain = urlDomain,
             timeout = timeout,
         )
     }

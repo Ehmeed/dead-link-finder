@@ -1,11 +1,9 @@
-
-
 plugins {
     kotlin("multiplatform") version "1.4.31"
 }
 
 group = "org.ehmeed"
-version = "1.0"
+version = "1.1.0"
 
 val kotlinVersion = "1.5.0"
 // ktor 1.5 fails on mutability of frozen client
@@ -18,6 +16,7 @@ repositories {
 kotlin {
     jvm {
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            dependsOn("createProperties")
             kotlinOptions {
                 jvmTarget = "1.8"
                 freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
@@ -77,6 +76,16 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
             }
         }
+    }
+}
+
+tasks.register("createProperties") {
+    doFirst {
+        val version = project.version.toString()
+        val props = File("$buildDir/../src/commonMain/kotlin/version.kt")
+        props.bufferedWriter().use {
+                it.append("""const val VERSION = "$version"""")
+            }
     }
 }
 

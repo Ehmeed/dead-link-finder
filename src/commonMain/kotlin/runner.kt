@@ -6,6 +6,8 @@ import http.UrlExt
 private const val USER_INPUT_LINK = "<given by user input>"
 
 suspend fun runner(config: Config) {
+    val urlDomain = UrlExt.getHost(config.url)
+    log.default { "Targeting url: ${config.url} host: $urlDomain" }
     val linksStore = LinkStore()
     installShutdownHook(linksStore, config)
     val httpClient = Client(config.allowedStatusCodes, config.requestHeaders, config.timeout)
@@ -18,7 +20,7 @@ suspend fun runner(config: Config) {
             val visitedLink = VisitedLink(nextToVisit.link, nextToVisit.source, nextToVisit.depth, nextToVisitContent)
             linksStore.addVisited(visitedLink)
             if (visitedLink.content is LinkContent.Success) {
-                getNewLinks(visitedLink.content.content, nextToVisit, config)
+                getNewLinks(visitedLink.content.content, nextToVisit, config, urlDomain)
                     .let(linksStore::addToVisit)
             }
             val linkLogger = if (visitedLink.content.isSuccess) { it: () -> String -> log.verbose(it) } else { it: () -> String -> log.default(it) }
@@ -30,7 +32,7 @@ suspend fun runner(config: Config) {
     exit(if (hasDeadLinks) 1 else 0)
 }
 
-private fun getNewLinks(content: String, link: ToVisitLink, config: Config): List<ToVisitLink> {
+private fun getNewLinks(content: String, link: ToVisitLink, config: Config, urlDomain: String): List<ToVisitLink> {
     val visitedLinkUrl = link.link.value
     if (link.depth == config.depth) {
         log.debug { "Reached maximum depth (${config.depth}) for: $visitedLinkUrl" }
@@ -43,8 +45,8 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config): Lis
         .map { ToVisitLink(it, link.link, link.depth + 1) }
         .filter { (link, _, linkDepth) ->
             when (config.crossDomainBehavior) {
-                Main.CrossDomainBehavior.IGNORE -> UrlExt.getHost(link.value) == config.urlDomain
-                Main.CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || UrlExt.getHost(link.value) == config.urlDomain
+                Main.CrossDomainBehavior.IGNORE -> UrlExt.getHost(link.value) == urlDomain
+                Main.CrossDomainBehavior.DONT_RECURSE -> linkDepth <= 1 || UrlExt.getHost(link.value) == urlDomain
                 Main.CrossDomainBehavior.UNCHANGED -> true
             }
         }.toList()

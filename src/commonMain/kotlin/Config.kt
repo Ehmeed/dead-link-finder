@@ -7,6 +7,5 @@ data class Config(
     val requestHeaders: List<Pair<String, String>>,
     val crossDomainBehavior: Main.CrossDomainBehavior,
     val logLevel: String,
-    val urlDomain: String,
     val timeout: Int,
 )
