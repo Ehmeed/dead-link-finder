@@ -64,6 +64,8 @@ class Main : CliktCommand() {
 
     private val noSummary: Boolean by option("--no-summary", help = "Don't show final summary. This option is forced if -q or --quiet was supplied").flag(default = false)
 
+    private val parseSitemap: Boolean by option("--sitemap", help = "Parse links from sitemap").flag(default = false)
+
     private val logLevel by option(
         help = """Verbosity level:
         ```
@@ -98,6 +100,7 @@ class Main : CliktCommand() {
             crossDomainBehavior = crossDomain,
             logLevel = logLevel,
             timeout = timeout,
+            parseSitemap = parseSitemap
         )
     }
 

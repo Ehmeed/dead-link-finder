@@ -6,13 +6,13 @@ class LinkParserTest {
 
     @Test
     fun emptyPageReturnsNoLinks() {
-        assertEquals(emptyList(), LinkParser.getLinks("", "http://webThemez.com", true))
+        assertEquals(emptyList(), LinkParser.getLinks("", "http://webThemez.com", true, true))
     }
 
     @Test
     fun invalidUrlThrows() {
         assertFailsWith<URLParserException> {
-            assertEquals(emptyList(), LinkParser.getLinks("", "", true))
+            assertEquals(emptyList(), LinkParser.getLinks("", "", true, true))
         }
     }
 
@@ -40,10 +40,10 @@ class LinkParserTest {
             "https://mapy.cz/s/toCP",
             "mailto:info@zahradnictvikarlov.cz",
         ).sorted()
-        val actual = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", false)
+        val actual = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", false, true)
             .map { it.value }.sorted()
         assertEquals(expected, actual)
-        val actualWithText = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", true)
+        val actualWithText = LinkParser.getLinks(zahradnictviKarlovHtml, "http://zahradnictvikarlov.cz", true, true)
             .map { it.value }.sorted()
         assertEquals(expected, actualWithText)
     }
@@ -53,7 +53,8 @@ class LinkParserTest {
         val links = LinkParser.getLinks(
             """to <a href="/docs/s-analytics/form-model-analysis"><strong>analyse a form model</strong></a>""",
             "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/",
-            parseText = true
+            parseText = true,
+            parseSitemap = true
         ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
 
         assertEquals(links.size, 1)
@@ -75,7 +76,8 @@ class LinkParserTest {
             """<a href="/docs/s-analytics/form-model-analysis">analyse a form
 model</a>""",
             "https://zoe.lundegaard.ai/docs/s-analytics/guides/form-tracking-with-webdata/",
-            parseText = true
+            parseText = true,
+            parseSitemap = true
         ).filter { it.rawValue == "/docs/s-analytics/form-model-analysis" }
 
         assertEquals(links.size, 1)
@@ -135,5 +137,46 @@ model</a>""",
         """.trimIndent()
 
         assertEquals("behavior_input_changes_distance", LinkParser.extractText(input))
+    }
+
+    @Test
+    fun parsingSitemap() {
+        val input = """
+            <?xml version="1.0" encoding="utf-8"?>
+            <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+              <url><loc>https://abc.com/cs-cz</loc></url>
+              <url><loc>https://abc.com/cs-cz/blog</loc></url>
+            </urlset>
+        """.trimIndent()
+
+
+        val withText = LinkParser.getLinks(input, "https://irelevant.com", true, true)
+        val withoutText = LinkParser.getLinks(input, "https://irelevant.com", false, true)
+
+        val expected = listOf(
+            Link.Absolute(
+                null,
+                "https://abc.com/cs-cz"
+            ),
+            Link.Absolute(
+                null,
+                "https://abc.com/cs-cz/blog"
+            )
+        )
+
+        assertEquals(withText[0].rawValue, withoutText[0].rawValue)
+        assertEquals(withText[0].text, withoutText[0].text)
+        assertEquals(withText[0].value, withoutText[0].value)
+        assertEquals(withText[1].rawValue, withoutText[1].rawValue)
+        assertEquals(withText[1].text, withoutText[1].text)
+        assertEquals(withText[1].value, withoutText[1].value)
+
+        assertEquals(withText[0].rawValue, expected[0].rawValue)
+        assertEquals(withText[0].text, expected[0].text)
+        assertEquals(withText[0].value, expected[0].value)
+
+        assertEquals(withText[1].rawValue, expected[1].rawValue)
+        assertEquals(withText[1].text, expected[1].text)
+        assertEquals(withText[1].value, expected[1].value)
     }
 }

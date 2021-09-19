@@ -5,10 +5,10 @@ object LinkParser {
     private val HREF_WITH_TEXT = Regex("""<a[^>]* href="([^"]*)"[^>]*>([\s\S]*?)(?=</a>)""")
     private val HREF = Regex("""<a[^>]* href="([^"]*)""")
 
-    fun getLinks(htmlContent: String, sourcePageUrl: String, parseText: Boolean): List<Link> {
+    fun getLinks(htmlContent: String, sourcePageUrl: String, parseText: Boolean, parseSitemap: Boolean): List<Link> {
         val normalizedSourcePageUrl = normalizeUrl(sourcePageUrl.substringBeforeLast("#"))
         val normalizedDomainUrl = normalizeUrl(UrlExt.removeUrlPath(sourcePageUrl))
-        return parseLinks(htmlContent, parseText)
+        return parseLinks(htmlContent, parseText, parseSitemap)
             .distinctBy { it.first }
             .map {
                 Link(
@@ -31,12 +31,21 @@ object LinkParser {
 
     private fun normalizeUrl(baseUrl: String): String = if (!baseUrl.endsWith("/")) "$baseUrl/" else baseUrl
 
-    private fun parseLinks(html: String, parseText: Boolean): Sequence<Pair<String, String?>> = if (parseText) {
-        HREF_WITH_TEXT.findAll(html)
-            .map { it.groupValues[1] to extractText(it.groupValues[2]) }
-    } else {
-        HREF.findAll(html)
-            .map { it.groupValues[1] to null }
+    private fun parseLinks(html: String, parseText: Boolean, sitemap: Boolean): List<Pair<String, String?>> {
+        val links = if (parseText) {
+            HREF_WITH_TEXT.findAll(html)
+                .map { it.groupValues[1] to extractText(it.groupValues[2]) }
+        } else {
+            HREF.findAll(html)
+                .map { it.groupValues[1] to null }
+        }.toMutableList()
+        if (sitemap) {
+            Regex("""<loc>([\s\S]*?)</loc>""").findAll(html).map { it.groupValues[1] to null }.toList().also {
+                links.addAll(it)
+            }
+        }
+
+        return links
     }
 
     private val INSIDE_TAG = Regex(""">([^<>]*)<""")

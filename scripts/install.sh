@@ -19,7 +19,7 @@ if [[ ${rebuild} == "--rebuild" ]]; then
   ./gradlew clean build
 fi
 
-version=$(grep 'version = ' build.gradle.kts | cut -d '=' -f2 | tr -d '" ')
+version=$(grep 'version = ' build.gradle.kts | cut -d '=' -f2 | tr -d '" ' | head -1)
 
 exe="./build/bin/native/releaseExecutable/dead-link-finder.kexe"
 target_name="dlf"

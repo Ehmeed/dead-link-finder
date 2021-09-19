@@ -38,7 +38,7 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config, urlD
         log.debug { "Reached maximum depth (${config.depth}) for: $visitedLinkUrl" }
         return emptyList()
     }
-    val newLinks = LinkParser.getLinks(content, visitedLinkUrl, config.parseText)
+    val newLinks = LinkParser.getLinks(content, visitedLinkUrl, config.parseText, config.parseSitemap)
 
     val candidateLinks = newLinks.asSequence()
         .filterNot { it is Link.Mailto }

@@ -4,10 +4,10 @@ fun main() = runBlocking {
 
     val args = arrayOf(
         "--verbose",
-        "--timeout", "100",
-        "--cross-domain", "ignore",
-        "-d", "3",
-        "http://localhost:8084/docs",
+//        "--cross-domain", "ignore",
+        "--timeout", "2000",
+        "-d", "1",
+        "https://solitea.com/sitemap_cs-cz.xml",
     )
     Main.main(args)
 }
