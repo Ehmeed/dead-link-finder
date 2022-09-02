@@ -41,7 +41,7 @@ private fun getNewLinks(content: String, link: ToVisitLink, config: Config, urlD
     val newLinks = LinkParser.getLinks(content, visitedLinkUrl, config.parseText, config.parseSitemap)
 
     val candidateLinks = newLinks.asSequence()
-        .filterNot { it is Link.Mailto }
+        .filter(Link::isVisitable)
         .map { ToVisitLink(it, link.link, link.depth + 1) }
         .filter { (link, _, linkDepth) ->
             when (config.crossDomainBehavior) {

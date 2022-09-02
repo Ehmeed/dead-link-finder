@@ -4,10 +4,9 @@ fun main() = runBlocking {
 
     val args = arrayOf(
         "--verbose",
-//        "--cross-domain", "ignore",
-        "--timeout", "2000",
-        "-d", "1",
-        "https://solitea.com/sitemap_cs-cz.xml",
+        "--show-text",
+        "--cross-domain", "ignore",
+        "https://zoe.lundegaard.ai",
     )
     Main.main(args)
 }

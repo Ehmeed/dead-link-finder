@@ -24,7 +24,8 @@ object LinkParser {
     internal fun Link(value: String, text: String?, sourcePageUrl: String, domainUrl: String): Link = when {
         value.startsWith("/") -> Link.RootRelative(text, value, domainUrl)
         value.startsWith("#") -> Link.Anchor(text, value, sourcePageUrl)
-        value.startsWith("mailto") -> Link.Mailto(text, value)
+        value.startsWith(Link.Mailto.PREFIX) -> Link.Mailto(text, value)
+        value.startsWith(Link.Tel.PREFIX) -> Link.Tel(text, value)
         value.startsWith("http") || value.startsWith("https") -> Link.Absolute(text, value)
         else -> Link.Relative(text, value, sourcePageUrl)
     }
